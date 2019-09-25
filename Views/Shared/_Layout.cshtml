@@ -1,4 +1,4 @@
-@{
+﻿@{
     ViewBag.currentController = @HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString();
 }
 <!DOCTYPE html>
@@ -38,7 +38,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="@Url.Action("Index", "Students")" class="@(ViewBag.currentController=="Students"?"active":"")">
+                    <a href="@Url.Action("Index", "Student")" class="@(ViewBag.currentController=="Student"?"active":"")">
                         <div><i class="fas fa-fw fa-users" /></i>Students</div>
                         <div class="actived"></div>
                     </a>
