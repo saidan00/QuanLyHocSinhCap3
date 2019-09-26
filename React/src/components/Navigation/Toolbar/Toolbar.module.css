@@ -1,0 +1,17 @@
+.Toolbar {
+  display: flex;
+  background-color: #fffffff7;
+  color: #ffffff;
+  height: 64px;
+  padding: 0 10px;
+  position: fixed;
+  z-index: 100;
+  box-shadow: 0 0 5px #5d5d5d45;
+  width: 100%;
+}
+
+.Utils {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}

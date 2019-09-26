@@ -1,0 +1,54 @@
+.SidedrawerItem {
+  display: flex;
+  border: 5px solid transparent;
+  font-size: 16px;
+  position: relative;
+  align-items: center;
+  color: #5f6368;
+  text-decoration: none;
+  height: 64px;
+  width: 100%;
+  padding: 10px;
+  transition: 0.15s ease-out;
+  transition-property: background-color, border, color, box-shadow;
+}
+
+.SidedrawerItem .itemWrapper {
+  transition: 0.15s;
+  transition-property: transform;
+}
+
+.SidedrawerItem:hover {
+  color: #1e88e5;
+  /*border: 5px solid #6ab7ff;*/
+  /*background-color: #1e88e5 !important;*/
+  /*box-shadow: 0 0 10px 3px #6ab7ff !important;*/
+  text-decoration: none;
+  z-index: 20;
+  cursor: pointer;
+}
+
+.SidedrawerItem:active > .itemWrapper {
+  transform: scale(0.9, 0.9);
+}
+
+.SidedrawerItem.active {
+  background-color: #ffffff;
+  box-shadow: -3px 0px 1px 2px #bbbbbb33;
+}
+
+.SidedrawerItem > .indicator {
+  position: fixed;
+  left: 0px;
+  width: 2px;
+  height: 64px;
+  border: 0 solid transparent;
+  transition: 0.15s ease-out;
+  transition-property: border, box-shadow;
+}
+
+.SidedrawerItem:hover > .indicator {
+  border: 2px solid #6ab7ff;
+  box-shadow: 0 0 10px #6ab7ff;
+}
+
