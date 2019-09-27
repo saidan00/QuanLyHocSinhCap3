@@ -18,6 +18,15 @@ namespace QuanLyHocSinhCap3.DAL
 
             students.ForEach(s => context.Students.Add(s));
             context.SaveChanges();
+
+            var accounts = new List<Account>
+            {
+                new Account {UserName="admin",Password="AQAAAAEAACcQAAAAEIE10Cf1qZcLx0H6ylIcOCWolIr1VaCyMi/KNQh/PHZ7PmmNwniLCIdPIPCdymWu6w=="}
+                // password hashed from 123456
+            };
+
+            accounts.ForEach(a => context.Accounts.Add(a));
+            context.SaveChanges();
         }
     }
 }
