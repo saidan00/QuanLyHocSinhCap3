@@ -1,0 +1,30 @@
+.ToolbarUtil {
+  width: 64px;
+  height: 64px;
+  font-size: 32px;
+  text-align: center;
+  color: #5f6368;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.15s ease-out;
+  transition-property: border, color;
+}
+
+.ToolbarUtil:hover {
+  cursor: pointer;
+}
+
+.ToolbarUtil > .active {
+  position: fixed;
+  align-self: flex-start;
+  width: 64px;
+  border: 0 solid transparent;
+  transition: 0.15s ease-out;
+  transition-property: border, box-shadow;
+}
+
+.ToolbarUtil:hover > .active {
+  border: 2px solid #6ab7ff;
+  box-shadow: 0 0 10px #6ab7ff;
+}
