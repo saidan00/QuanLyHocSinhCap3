@@ -4,29 +4,10 @@
     'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
     'Segoe UI Symbol', 'Noto Color Emoji';
   box-sizing: border-box;
-  scroll-behavior: smooth;
 }
 
-table {
-  width: 100%;
-  box-shadow: 0 10px 10px rgba(237, 237, 237, 0.9);
-}
-
-table thead td,
-table tbody td {
-  padding: 0.75rem;
-  border: 1px solid #ededed;
-}
-
-table tbody td {
-  color: #5f6368;
-}
-
-table thead td {
-  background-color: #e8e8e8;
-  border-bottom-width: 3px;
-}
-
-table tbody tr:nth-child(even) {
-  background-color: #f2f2f2;
+p,
+h1, h2, h3, h4, h5, h6,
+input {
+  color: #5F6368 !important;
 }

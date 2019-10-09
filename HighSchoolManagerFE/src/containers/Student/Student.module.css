@@ -1,0 +1,39 @@
+.Student {
+  animation-name: fadeIn;
+  animation-duration: 0.5s;
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.Student .FilterInput {
+  width: initial;
+  /*margin: 0px 48px 32px 16px;*/
+}
+
+.Student .FilterSelect {
+  width: 160px;
+  /*margin: 0px 48px 32px 16px;*/
+}
+
+.Student .FilterWrapper {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.Student .FilterWrapper .FilterInput,
+.Student .FilterWrapper .FilterSelect,
+.Student .FilterWrapper > div > span {
+  margin: 0 16px 32px 0px;
+}
+
+.Student .TableWrapper {
+  overflow: scroll;
+  height: calc(100vh - 362px);
+}

@@ -1,0 +1,20 @@
+.CreateClass {
+  width: 100%;
+  height: calc(100% - 106px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.FormWrapper {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: calc(100px + 32px + 200px + 32px);
+}
+
+.FieldWrapper {
+  width: 100%;
+  margin: 0 0 32px;
+}
