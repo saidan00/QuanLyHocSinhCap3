@@ -1,6 +1,5 @@
 import React, {Component, Fragment} from 'react';
 import axios from 'axios';
-import styles from './Register.module.css';
 import Button from '../../../components/UI/Button/Button';
 import {Input} from 'antd';
 

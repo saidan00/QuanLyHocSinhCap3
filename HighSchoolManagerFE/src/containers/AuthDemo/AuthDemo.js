@@ -1,7 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import axios from 'axios';
-import Cookies from 'js-cookie';
-import styles from './Authentication.module.css';
+import Request from '../../common/commonRequest';
 import Button from '../../components/UI/Button/Button';
 import Login from './Login/Login';
 import Register from './Register/Register';
@@ -18,16 +17,24 @@ class Authentication extends Component {
     axios.get('/Account/isSignedIn', {withCredentials: true}).then(response => {
       console.log(response);
       this.setState({auth: response.data});
-    });
+    }).catch(error => {console.log(error.response)});
     this.getUserInfo();
   }
 
   getUserInfo() {
-    axios.get('/Account/User', {withCredentials: true}).then(response => {
+    axios.get('/Account/CurrentUser', {withCredentials: true}).then(response => {
       console.log(response);
-      let user = {username: response.data};
+      let user = {username: response.data.userName};
       this.setState({currentUser: user});
-    });
+    }).catch(error => {console.log(error.response)});
+
+    Request.get('/Account/CurrentUser', "cred",
+      response => {
+        console.log(response);
+        let user = {username: response.data.userName};
+        this.setState({currentUser: user});
+      },
+      error => {console.log(error.response)});
   }
 
   logOutHandler = () => {
@@ -39,7 +46,6 @@ class Authentication extends Component {
   }
 
   componentDidMount() {
-    console.log(Cookies.get());
     this.checkIsSignedIn();
   }
 
