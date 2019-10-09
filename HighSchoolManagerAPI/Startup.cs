@@ -1,21 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using HighSchoolManagerAPI.Data;
-using HighSchoolManagerAPI.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace HighSchoolManagerAPI
 {
@@ -47,30 +38,24 @@ namespace HighSchoolManagerAPI
                         });
                     });
 
-            // services.Configure<CookiePolicyOptions>(options =>
-            //     {
-            //         options.CheckConsentNeeded = context => true;
-            //         options.MinimumSameSitePolicy = SameSiteMode.None;
-            //     });
-
+            // change context to match with your database
             services.AddDbContext<HighSchoolContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("HoangConn")));
+                options.UseSqlServer(Configuration.GetConnectionString("HuyContext")));
 
-            // services.AddDefaultIdentity<Account>()
-            //     .AddEntityFrameworkStores<HighSchoolContext>()
-            //     .AddDefaultTokenProviders();
             services.AddIdentity<IdentityUser, IdentityRole>()
                     .AddEntityFrameworkStores<HighSchoolContext>();
 
-            // services.AddIdentityServer()
-            //     .AddApiAuthorization<IdentityUser, HighSchoolContext>();
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.AccessDeniedPath = "/api/Account/AccessDenied";
+                options.LoginPath = "/api/Account/NotLoggedIn";
+                //     ReturnUrlParameter requires 
+                //     using Microsoft.AspNetCore.Authentication.Cookies;
+                options.ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
+                options.SlidingExpiration = true;
+            });
 
-            services.AddAuthentication()
-                .AddIdentityServerJwt();
-
-            // services.AddControllers();
-            services.AddControllers()
-                    .AddNewtonsoftJson();
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -87,9 +72,7 @@ namespace HighSchoolManagerAPI
 
             app.UseAuthentication();
 
-            // app.UseIdentityServer();
-
-            // app.UseAuthorization();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

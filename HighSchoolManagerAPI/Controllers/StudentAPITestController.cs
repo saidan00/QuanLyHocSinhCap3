@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using HighSchoolManagerAPI.Data;
 using HighSchoolManagerAPI.Models;
 
-namespace HighSchool.Controllers
+namespace HighSchoolManagerAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
