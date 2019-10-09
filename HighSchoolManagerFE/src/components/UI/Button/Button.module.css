@@ -9,7 +9,7 @@
   line-height: 1.5;
   cursor: pointer;
   color: #ffffff !important;
-  margin: 10px 10px 10px 0;
+  /*margin: 10px 10px 10px 0;*/
   border-radius: 2px !important;
   border: 0.2rem solid #ffffff2e;
   transition: color 0.15s ease-out, background-color 0.15s ease-out,
@@ -26,6 +26,7 @@
 
 .Button:focus {
   border-bottom-color: #ebcb8bb8 !important;
+  outline: none !important;
 }
 
 .Button[disabled] {

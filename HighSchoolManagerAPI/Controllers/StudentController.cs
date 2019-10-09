@@ -15,7 +15,7 @@ namespace HighSchoolManagerAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    // [Authorize(Roles = "Manager, Teacher")] // giáo vụ, giáo viên
+    [Authorize(Roles = "Manager, Teacher")] // giáo vụ, giáo viên
     public class StudentController : ControllerBase
     {
         private readonly HighSchoolContext _context;
@@ -31,7 +31,7 @@ namespace HighSchoolManagerAPI.Controllers
         // Return a list of student or empty list if filter by others
         // Get students that are not in class -> classId = 0
         [HttpGet("Get")]
-        public async Task<ActionResult> GetStudents(int? studentId, string firstName, string lastName, int? gradeId, int? classId, int? year, string sort)
+        public async Task<ActionResult> GetStudents(int? studentId, string name, int? gradeId, int? classId, int? year, string sort)
         {
             // filter by studentId
             if (studentId != null)
@@ -50,16 +50,17 @@ namespace HighSchoolManagerAPI.Controllers
                 from s in _context.Students
                 select s;
 
-            // filter by first name
-            if (!String.IsNullOrEmpty(firstName))
+            // filter by first name or last name
+            if (!String.IsNullOrEmpty(name))
             {
-                students = students.Where(s => s.FirstName.Contains(firstName));
-            }
-
-            // filter by last name
-            if (!String.IsNullOrEmpty(lastName))
-            {
-                students = students.Where(s => s.LastName.Contains(lastName));
+                List<string> namesArr = name.Split(' ').ToList();
+                var newStudents = students.Where(s => s.FirstName.Contains(namesArr[0]) || s.LastName.Contains(namesArr[0]));
+                for (int i=1; i<namesArr.Count; i++) {
+                    string newName = namesArr[i];
+                    var newStudents2 = students.Where(s => s.FirstName.Contains(newName) || s.LastName.Contains(newName));
+                    newStudents = newStudents.Union(newStudents2);
+                }
+                students = newStudents;
             }
 
             // filter by gradeId

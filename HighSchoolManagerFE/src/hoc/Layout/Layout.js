@@ -7,12 +7,10 @@ const layout = (props) => {
   return (
     <Fragment>
       <Toolbar />
-      <div className="d-flex">
+      <div style={{display: 'flex'}}>
         <Sidedrawer />
         <div className={styles.Wrapper}>
-          <div className="container-fluid">
-            {props.children}
-          </div>
+          {props.children}
         </div>
       </div>
     </Fragment>

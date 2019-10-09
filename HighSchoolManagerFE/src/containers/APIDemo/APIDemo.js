@@ -1,7 +1,6 @@
 import React, {Component, Fragment} from 'react';
-import styles from './APIDemo.module.css';
-import axios from 'axios';
 import moment from 'moment';
+import Request from '../../common/commonRequest';
 import Button from '../../components/UI/Button/Button';
 import {DatePicker, Input, Select} from 'antd';
 const {Option} = Select;
@@ -21,19 +20,21 @@ class APIDemo extends Component {
 
   fetchStudents() {
     this.setState({loading: true});
-    axios.get('/StudentAPITest').then(response => {
-      let newStudents = [...response.data];
-      newStudents.forEach(el => {
-        el.birthday = moment(el.birthday, 'YYYY/MM/DD');
-      });
-      this.setState({students: newStudents, loading: false});
-    });
+    Request.get(
+      '/Student/Get',
+      "cred",
+      response => {
+        let newStudents = [...response.data];
+        newStudents.forEach(el => {
+          el.birthday = moment(el.birthday, 'YYYY/MM/DD');
+        });
+        this.setState({students: newStudents, loading: false});
+      },
+    );
   }
 
   addingStudentOnChangeHandler = (event, key) => {
-    const value = event ?
-      ( (event.target) ? event.target.value : event )
-      : null;
+    const value = event ? (event.target ? event.target.value : event) : null;
     this.setState(prevState => {
       let newStudent = {...prevState.addingStudent};
       newStudent[key] = value;
@@ -42,9 +43,7 @@ class APIDemo extends Component {
   };
 
   updatingStudentOnChangeHandler = (event, key) => {
-    const value = event ?
-      ( (event.target) ? event.target.value : event )
-      : null;
+    const value = event ? (event.target ? event.target.value : event) : null;
     this.setState(prevState => {
       let newStudent = {...prevState.updatingStudent};
       newStudent[key] = value;
@@ -65,34 +64,40 @@ class APIDemo extends Component {
 
   addStudentHandler = () => {
     const newStudent = {...this.state.addingStudent};
-    newStudent.birthday = newStudent.birthday.format('YYYY/MM/DD');
+    newStudent.birthday = newStudent.birthday.format('YYYY-MM-DD');
     console.log(newStudent);
-    axios
-      .post('/StudentAPITest', newStudent)
-      .then(response => {
+    Request.post(
+      '/Student/Create',
+      newStudent,
+      "cred",
+      response => {
         console.log('POST SUCCESSFUL!', response);
         this.fetchStudents();
         this.setState({addingStudent: {}});
-      })
-      .catch(error => {
-        console.log('POST UNSUCCESSFUL :(', error);
-      });
+      },
+      error => {
+        console.log('POST UNSUCCESSFUL :(', error.response);
+      },
+    );
   };
 
   updateStudentHandler = () => {
     const newStudent = {...this.state.updatingStudent};
     const newStudentId = this.state.updatingstudentID;
-    newStudent.birthday = newStudent.birthday.format('YYYY/MM/DD');
-    axios
-      .put('/StudentAPITest/' + newStudentId, newStudent)
-      .then(response => {
+    newStudent.birthday = newStudent.birthday.format('YYYY-MM-DD');
+    Request.put(
+      '/Student/Edit?studentId='+newStudentId,
+      newStudent,
+      "cred",
+      response => {
         console.log('PUT SUCCESSFUL!', response);
         this.fetchStudents();
         this.setState({updatingStudent: {}, updatingstudentID: null});
-      })
-      .catch(error => {
+      },
+      error => {
         console.log('PUT UNSUCCESSFUL :(', error);
-      });
+      },
+    );
   };
 
   render() {
@@ -124,7 +129,7 @@ class APIDemo extends Component {
                     <td>{el.classID}</td>
                     <td>{el.lastName}</td>
                     <td>{el.firstName}</td>
-                    <td>{el.birthday.format("DD/MM/YYYY")}</td>
+                    <td>{el.birthday.format('DD/MM/YYYY')}</td>
                     <td>{el.address}</td>
                   </tr>
                 ))}
