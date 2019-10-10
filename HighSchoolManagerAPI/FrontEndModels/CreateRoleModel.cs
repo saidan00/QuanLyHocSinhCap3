@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace HighSchoolManagerAPI.Models
+namespace HighSchoolManagerAPI.FrontEndModels
 {
     public class CreateRoleModel
     {
