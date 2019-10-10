@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using HighSchoolManagerAPI.Models;
+using HighSchoolManagerAPI.FrontEndModels;
 using HighSchoolManagerAPI.Helpers;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;

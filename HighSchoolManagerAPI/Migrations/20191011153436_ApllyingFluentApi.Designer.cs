@@ -4,14 +4,16 @@ using HighSchoolManagerAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HighSchoolManagerAPI.Migrations
 {
     [DbContext(typeof(HighSchoolContext))]
-    partial class HighSchoolContextModelSnapshot : ModelSnapshot
+    [Migration("20191011153436_ApllyingFluentApi")]
+    partial class ApllyingFluentApi
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
