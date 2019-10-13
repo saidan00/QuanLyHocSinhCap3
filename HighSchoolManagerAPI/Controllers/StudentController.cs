@@ -9,19 +9,22 @@ using Microsoft.EntityFrameworkCore;
 using HighSchoolManagerAPI.Data;
 using HighSchoolManagerAPI.Models;
 using HighSchoolManagerAPI.FrontEndModels;
+using HighSchoolManagerAPI.Helpers;
 
 namespace HighSchoolManagerAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Manager, Teacher")] // giáo vụ, giáo viên
+    // [Authorize(Roles = "Manager, Teacher")] // giáo vụ, giáo viên
     public class StudentController : ControllerBase
     {
         private readonly HighSchoolContext _context;
+        private ResponseHelper resp;
 
         public StudentController(HighSchoolContext context)
         {
             _context = context;
+            resp = new ResponseHelper();
         }
 
         // Return a student or not found if filter by studentId
@@ -46,7 +49,6 @@ namespace HighSchoolManagerAPI.Controllers
             var students =
                 from s in _context.Students
                 select s;
-            students = students.OrderBy(s => s.FirstName);
 
             // filter by first name
             if (!String.IsNullOrEmpty(firstName))
@@ -112,6 +114,7 @@ namespace HighSchoolManagerAPI.Controllers
             }
             else
             {
+                // response helper method
                 var errors = new List<string>();
                 foreach (var state in ModelState)
                 {
@@ -183,12 +186,7 @@ namespace HighSchoolManagerAPI.Controllers
             _context.Students.Remove(student);
             await _context.SaveChangesAsync();
 
-            return Ok();
-        }
-
-        private bool StudentExists(int id)
-        {
-            return _context.Students.Any(e => e.StudentID == id);
+            return Ok(student);
         }
     }
 }
