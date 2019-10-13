@@ -4,14 +4,16 @@ using HighSchoolManagerAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HighSchoolManagerAPI.Migrations
 {
     [DbContext(typeof(HighSchoolContext))]
-    partial class HighSchoolContextModelSnapshot : ModelSnapshot
+    [Migration("20191014143711_Extend_IdentityUser")]
+    partial class Extend_IdentityUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

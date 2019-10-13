@@ -6,6 +6,7 @@ using HighSchoolManagerAPI.FrontEndModels;
 using HighSchoolManagerAPI.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using HighSchoolManagerAPI.Models;
 
 namespace HighSchoolManagerAPI.Controllers
 {
@@ -13,14 +14,14 @@ namespace HighSchoolManagerAPI.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> userManager;
-        private readonly SignInManager<IdentityUser> signInManager;
-        private ResponeHelper resp;
-        public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
+        private ResponseHelper resp;
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
-            resp = new ResponeHelper();
+            resp = new ResponseHelper();
         }
 
         [HttpPost("Login")]
@@ -45,8 +46,8 @@ namespace HighSchoolManagerAPI.Controllers
             }
             else
             {
-                resp.status = 401;
-                resp.errors.Add("User name or password is incorrect");
+                resp.code = 401;
+                resp.messages.Add("User name or password is incorrect");
                 return Unauthorized(resp);
             }
         }
@@ -74,7 +75,7 @@ namespace HighSchoolManagerAPI.Controllers
                 return BadRequest(errors);
             }
 
-            var user = new IdentityUser { UserName = model.UserName };
+            var user = new ApplicationUser { UserName = model.UserName };
             var result = await userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
@@ -84,8 +85,8 @@ namespace HighSchoolManagerAPI.Controllers
             else
             {
                 var errors = result.Errors;
-                resp.status = 400;
-                resp.errors.AddRange(errors);
+                resp.code = 400;
+                resp.messages.AddRange(errors);
                 return BadRequest(resp);
             }
         }
@@ -100,8 +101,8 @@ namespace HighSchoolManagerAPI.Controllers
         [HttpGet("NotLoggedIn")]
         public ActionResult NotLoggedIn()
         {
-            resp.status = 401;
-            resp.errors.Add("User is not logged in");
+            resp.code = 401;
+            resp.messages.Add("User is not logged in");
             return Unauthorized(resp);
         }
 
@@ -129,7 +130,7 @@ namespace HighSchoolManagerAPI.Controllers
         [Authorize]
         public async Task<IList<string>> GetUserRoles(string UserName)
         {
-            IdentityUser user = await userManager.FindByNameAsync(UserName);
+            ApplicationUser user = await userManager.FindByNameAsync(UserName);
             return await userManager.GetRolesAsync(user);
         }
     }

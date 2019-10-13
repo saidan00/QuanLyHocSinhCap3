@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using HighSchoolManagerAPI.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using HighSchoolManagerAPI.Models;
 
 namespace HighSchoolManagerAPI
 {
@@ -42,7 +43,7 @@ namespace HighSchoolManagerAPI
             services.AddDbContext<HighSchoolContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("HuyContext")));
 
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>()
                     .AddEntityFrameworkStores<HighSchoolContext>();
 
             services.ConfigureApplicationCookie(options =>
