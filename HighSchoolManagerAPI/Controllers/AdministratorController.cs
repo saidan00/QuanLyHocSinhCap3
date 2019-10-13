@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using HighSchoolManagerAPI.Models;
 
 namespace HighSchoolManagerAPI.Controllers
 {
@@ -15,13 +16,13 @@ namespace HighSchoolManagerAPI.Controllers
     public class AdministratorController : ControllerBase
     {
         private readonly RoleManager<IdentityRole> roleManager;
-        private readonly UserManager<IdentityUser> userManager;
-        private ResponeHelper resp;
-        public AdministratorController(RoleManager<IdentityRole> roleManager, UserManager<IdentityUser> userManager)
+        private readonly UserManager<ApplicationUser> userManager;
+        private ResponseHelper resp;
+        public AdministratorController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
-            resp = new ResponeHelper();
+            resp = new ResponseHelper();
         }
 
         // Get all roles
@@ -72,16 +73,16 @@ namespace HighSchoolManagerAPI.Controllers
             var user = await userManager.FindByNameAsync(UserName);
             if (user == null)
             {
-                resp.status = 404;
-                resp.errors.Add("User " + UserName + " not found");
+                resp.code = 404;
+                resp.messages.Add("User " + UserName + " not found");
                 return NotFound(resp);
             }
 
             var role = await roleManager.FindByNameAsync(RoleName);
             if (role == null)
             {
-                resp.status = 404;
-                resp.errors.Add("Role " + RoleName + " not found");
+                resp.code = 404;
+                resp.messages.Add("Role " + RoleName + " not found");
                 return NotFound(resp);
             }
 
@@ -101,8 +102,8 @@ namespace HighSchoolManagerAPI.Controllers
             }
             else
             {
-                resp.status = 400;
-                resp.errors.Add("User " + UserName + " is already in role " + RoleName);
+                resp.code = 400;
+                resp.messages.Add("User " + UserName + " is already in role " + RoleName);
                 return BadRequest(resp);
             }
         }
@@ -113,16 +114,16 @@ namespace HighSchoolManagerAPI.Controllers
             var user = await userManager.FindByNameAsync(UserName);
             if (user == null)
             {
-                resp.status = 404;
-                resp.errors.Add("User " + UserName + " not found");
+                resp.code = 404;
+                resp.messages.Add("User " + UserName + " not found");
                 return NotFound(resp);
             }
 
             var role = await roleManager.FindByNameAsync(RoleName);
             if (role == null)
             {
-                resp.status = 404;
-                resp.errors.Add("Role " + RoleName + " not found");
+                resp.code = 404;
+                resp.messages.Add("Role " + RoleName + " not found");
                 return NotFound(resp);
             }
 
@@ -142,8 +143,8 @@ namespace HighSchoolManagerAPI.Controllers
             }
             else
             {
-                resp.status = 400;
-                resp.errors.Add("User " + UserName + " is not in role " + RoleName);
+                resp.code = 400;
+                resp.messages.Add("User " + UserName + " is not in role " + RoleName);
                 return BadRequest(resp);
             }
         }

@@ -7,7 +7,7 @@ using HighSchoolManagerAPI.Models;
 namespace HighSchoolManagerAPI.Data
 {
     // public class HighSchoolContext : ApiAuthorizationDbContext<Account>
-    public class HighSchoolContext : IdentityDbContext<IdentityUser>
+    public class HighSchoolContext : IdentityDbContext<ApplicationUser>
 
     {
         // public HighSchoolContext(DbContextOptions<HighSchoolContext> options, IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
@@ -15,14 +15,12 @@ namespace HighSchoolManagerAPI.Data
         {
 
         }
-        // public virtual DbSet<Account> Accounts { get; set; }
         public virtual DbSet<Class> Classes { get; set; }
         public virtual DbSet<Conduct> Conducts { get; set; }
         public virtual DbSet<Grade> Grades { get; set; }
         public virtual DbSet<Result> Results { get; set; }
         public virtual DbSet<ResultDetail> ResultDetails { get; set; }
         public virtual DbSet<ResultType> ResultTypes { get; set; }
-        // public virtual DbSet<AccountRole> AccountRoles { get; set; }
         public virtual DbSet<Semester> Semesters { get; set; }
         public virtual DbSet<Student> Students { get; set; }
         public virtual DbSet<Subject> Subjects { get; set; }
@@ -36,6 +34,11 @@ namespace HighSchoolManagerAPI.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // class name + year must be unique
+            modelBuilder.Entity<Class>()
+                    .HasIndex(e => new { e.Name, e.Year })
+                    .IsUnique();
         }
     }
 }
