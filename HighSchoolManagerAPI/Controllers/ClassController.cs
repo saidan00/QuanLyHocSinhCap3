@@ -31,7 +31,7 @@ namespace HighSchoolManagerAPI.Controllers
         // GET: api/Class/Get -> Get all classes
         // GET: api/Class/Get?classId=2
         [HttpGet("Get")]
-        public async Task<ActionResult> GetClasses(int? classId, string name, int? year, int? gradeId, int? headTeacherId)
+        public async Task<ActionResult> GetClasses(int? classId, string name, int? year, int? gradeId, int? headTeacherId, string sort)
         {
             // filter by classId
             if (classId != null)
@@ -75,6 +75,39 @@ namespace HighSchoolManagerAPI.Controllers
             }
 
             classes = classes.OrderBy(c => c.ClassID);
+
+            if (!String.IsNullOrEmpty(sort))
+            {
+                switch (sort)
+                {
+                    case "name":
+                        classes = classes.OrderBy(c => c.Name);
+                        break;
+                    case "name-desc":
+                        classes = classes.OrderByDescending(c => c.Name);
+                        break;
+                    case "grade":
+                        classes = classes.OrderBy(c => c.Grade);
+                        break;
+                    case "grade-desc":
+                        classes = classes.OrderByDescending(c => c.Grade);
+                        break;
+                    case "year":
+                        classes = classes.OrderBy(c => c.Year);
+                        break;
+                    case "year-desc":
+                        classes = classes.OrderByDescending(c => c.Year);
+                        break;
+                    case "teacher":
+                        classes = classes.OrderBy(c => c.Year);
+                        break;
+                    case "teacher-desc":
+                        classes = classes.OrderByDescending(c => c.Name);
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             return Ok(await classes.ToListAsync());
         }

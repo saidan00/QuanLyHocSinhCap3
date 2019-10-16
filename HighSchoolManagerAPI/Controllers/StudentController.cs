@@ -31,7 +31,7 @@ namespace HighSchoolManagerAPI.Controllers
         // Return a list of student or empty list if filter by others
         // Get students that are not in class -> classId = 0
         [HttpGet("Get")]
-        public async Task<ActionResult> GetStudents(int? studentId, string firstName, string lastName, int? gradeId, int? classId, int? year)
+        public async Task<ActionResult> GetStudents(int? studentId, string firstName, string lastName, int? gradeId, int? classId, int? year, string sort)
         {
             // filter by studentId
             if (studentId != null)
@@ -87,8 +87,48 @@ namespace HighSchoolManagerAPI.Controllers
                 students = students.Where(s => s.Class.Year == year);
             }
 
-            // order by studentId
+            // order by studentId (default)
             students = students.OrderBy(s => s.StudentID);
+
+            // order by others
+            if (!String.IsNullOrEmpty(sort))
+            {
+                switch (sort)
+                {
+                    case "firstname":
+                        students = students.OrderBy(s => s.FirstName);
+                        break;
+                    case "firstname-desc":
+                        students = students.OrderByDescending(s => s.FirstName);
+                        break;
+                    case "lastname":
+                        students = students.OrderBy(s => s.LastName);
+                        break;
+                    case "lastname-desc":
+                        students = students.OrderByDescending(s => s.LastName);
+                        break;
+                    case "class":
+                        students = students.OrderBy(s => s.ClassID);
+                        break;
+                    case "class-desc":
+                        students = students.OrderByDescending(s => s.ClassID);
+                        break;
+                    case "grade":
+                        students = students.OrderBy(s => s.Class.GradeID);
+                        break;
+                    case "grade-desc":
+                        students = students.OrderByDescending(s => s.Class.GradeID);
+                        break;
+                    case "year":
+                        students = students.OrderBy(s => s.Class.Year);
+                        break;
+                    case "year-desc":
+                        students = students.OrderByDescending(s => s.Class.Year);
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             return Ok(await students.ToListAsync());
         }
