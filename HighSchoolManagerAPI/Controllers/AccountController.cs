@@ -7,6 +7,7 @@ using HighSchoolManagerAPI.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using HighSchoolManagerAPI.Models;
+using HighSchoolManagerAPI.Data;
 
 namespace HighSchoolManagerAPI.Controllers
 {
@@ -16,18 +17,36 @@ namespace HighSchoolManagerAPI.Controllers
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly HighSchoolContext _context;
         private ResponseHelper resp;
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        private ExistHelper exist;
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, HighSchoolContext context)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
+            _context = context;
             resp = new ResponseHelper();
+            exist = new ExistHelper(_context);
         }
 
         [HttpPost("Login")]
         public async Task<ActionResult> Login(LoginModel model)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
+            {
+                var result = await signInManager.PasswordSignInAsync(model.UserName, model.Password, isPersistent: false, false);
+                if (result.Succeeded)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    resp.code = 401;
+                    resp.messages.Add("User name or password is incorrect");
+                    return Unauthorized(resp);
+                }
+            }
+            else
             {
                 var errors = new List<string>();
                 foreach (var state in ModelState)
@@ -38,17 +57,6 @@ namespace HighSchoolManagerAPI.Controllers
                     }
                 }
                 return BadRequest(errors);
-            }
-            var result = await signInManager.PasswordSignInAsync(model.UserName, model.Password, isPersistent: false, false);
-            if (result.Succeeded)
-            {
-                return Ok();
-            }
-            else
-            {
-                resp.code = 401;
-                resp.messages.Add("User name or password is incorrect");
-                return Unauthorized(resp);
             }
         }
 
@@ -59,10 +67,43 @@ namespace HighSchoolManagerAPI.Controllers
             return Ok();
         }
 
-        [HttpPost("Register")]
-        public async Task<ActionResult> Register(RegisterModel model)
+        // we do not use 'register'
+        [HttpPost("Create")]
+        public async Task<ActionResult> CreateUser(RegisterModel model)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
+            {
+                // check if foreign key(s), unique key(s) are invalid
+                if (!IsKeysValid(model))
+                {
+                    return StatusCode(resp.code, resp);
+                }
+
+                var user = new ApplicationUser
+                {
+                    UserName = model.UserName,
+                    TeacherID = model.TeacherID
+                };
+
+                var result = await userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    // await signInManager.SignInAsync(user, isPersistent: false);
+                    var defaultRole = "Teacher";
+                    await userManager.AddToRoleAsync(user, defaultRole);
+
+                    return Ok();
+                }
+                else
+                {
+                    var errors = result.Errors;
+                    resp.code = 400;
+                    resp.messages.AddRange(errors);
+                    return BadRequest(resp);
+                }
+            }
+            else
             {
                 var errors = new List<string>();
                 foreach (var state in ModelState)
@@ -73,21 +114,6 @@ namespace HighSchoolManagerAPI.Controllers
                     }
                 }
                 return BadRequest(errors);
-            }
-
-            var user = new ApplicationUser { UserName = model.UserName };
-            var result = await userManager.CreateAsync(user, model.Password);
-            if (result.Succeeded)
-            {
-                // await signInManager.SignInAsync(user, isPersistent: false);
-                return Ok();
-            }
-            else
-            {
-                var errors = result.Errors;
-                resp.code = 400;
-                resp.messages.AddRange(errors);
-                return BadRequest(resp);
             }
         }
 
@@ -132,6 +158,18 @@ namespace HighSchoolManagerAPI.Controllers
         {
             ApplicationUser user = await userManager.FindByNameAsync(UserName);
             return await userManager.GetRolesAsync(user);
+        }
+
+        private bool IsKeysValid(RegisterModel model)
+        {
+            if (!exist.TeacherExists(model.TeacherID))
+            {
+                resp.code = 404;
+                resp.messages.Add(new { Teacher = "Teacher not found" });
+                return false;
+            }
+
+            return true;
         }
     }
 }
