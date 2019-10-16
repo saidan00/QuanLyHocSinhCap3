@@ -9,5 +9,7 @@ namespace HighSchoolManagerAPI.FrontEndModels
         [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "Teacher ID is required")]
+        public int TeacherID { get; set; }
     }
 }

@@ -19,6 +19,12 @@ namespace HighSchoolManagerAPI.Helpers
             return _context.Students.Any(e => e.StudentID == id);
         }
 
+        public bool TeacherExists(int? id)
+        {
+            id = id.HasValue ? id.Value : 0;
+            return _context.Teachers.Any(e => e.TeacherID == id);
+        }
+
         public bool GradeExists(int? id)
         {
             id = id.HasValue ? id.Value : 0;
