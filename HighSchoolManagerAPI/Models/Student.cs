@@ -11,9 +11,13 @@ namespace HighSchoolManagerAPI.Models
 
         public string LastName { get; set; }
 
+        public string Gender { get; set; }
+
         public DateTime Birthday { get; set; }
 
         public string Address { get; set; }
+
+        public DateTime EnrollDate { get; set; }
 
         public int? ClassID { get; set; }
 
