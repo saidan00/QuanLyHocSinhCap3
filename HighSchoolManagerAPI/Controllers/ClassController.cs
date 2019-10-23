@@ -87,10 +87,10 @@ namespace HighSchoolManagerAPI.Controllers
                         classes = classes.OrderByDescending(c => c.Name);
                         break;
                     case "grade":
-                        classes = classes.OrderBy(c => c.Grade);
+                        classes = classes.OrderBy(c => c.Grade.Name);
                         break;
                     case "grade-desc":
-                        classes = classes.OrderByDescending(c => c.Grade);
+                        classes = classes.OrderByDescending(c => c.Grade.Name);
                         break;
                     case "year":
                         classes = classes.OrderBy(c => c.Year);
