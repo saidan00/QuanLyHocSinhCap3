@@ -108,6 +108,12 @@ namespace HighSchoolManagerAPI.Controllers
                     case "lastname-desc":
                         students = students.OrderByDescending(s => s.LastName);
                         break;
+                    case "gender":
+                        students = students.OrderBy(s => s.Gender);
+                        break;
+                    case "gender-desc":
+                        students = students.OrderByDescending(s => s.Gender);
+                        break;
                     case "class":
                         students = students.OrderBy(s => s.ClassID);
                         break;
@@ -144,8 +150,10 @@ namespace HighSchoolManagerAPI.Controllers
                 {
                     FirstName = model.FirstName,
                     LastName = model.LastName,
+                    Gender = model.Gender,
                     Birthday = model.Birthday,
                     Address = model.Address,
+                    EnrollDate = model.EnrollDate,
                     ClassID = model.ClassID
                 };
 
@@ -186,8 +194,10 @@ namespace HighSchoolManagerAPI.Controllers
                 //bind value
                 student.FirstName = model.FirstName;
                 student.LastName = model.LastName;
+                student.Gender = model.Gender;
                 student.Birthday = model.Birthday;
                 student.Address = model.Address;
+                student.EnrollDate = model.EnrollDate;
                 student.ClassID = model.ClassID;
 
                 // Update in DbSet
