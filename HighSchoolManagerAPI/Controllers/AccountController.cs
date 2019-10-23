@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using HighSchoolManagerAPI.Models;
 using HighSchoolManagerAPI.Data;
+using System.Linq;
 
 namespace HighSchoolManagerAPI.Controllers
 {
@@ -158,6 +159,29 @@ namespace HighSchoolManagerAPI.Controllers
         {
             ApplicationUser user = await userManager.FindByNameAsync(UserName);
             return await userManager.GetRolesAsync(user);
+        }
+
+        // GET: api/Account/GetUserName?teacherId=5
+        [HttpGet("GetUserName")]
+        // [Authorize]
+        public ActionResult<string> GetUserName(int? teacherId)
+        {
+            if (teacherId == null)
+            {
+                return BadRequest();
+            }
+
+            var aAccount =
+                _context.Users
+                .Where(a => a.TeacherID == teacherId)
+                .FirstOrDefault();
+
+            if (aAccount == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(aAccount.UserName);
         }
 
         private bool IsKeysValid(RegisterModel model)

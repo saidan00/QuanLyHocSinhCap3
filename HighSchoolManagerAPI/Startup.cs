@@ -41,7 +41,7 @@ namespace HighSchoolManagerAPI
 
             // change context to match with your database
             services.AddDbContext<HighSchoolContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("NganConn")));
+                options.UseSqlServer(Configuration.GetConnectionString("HuyContext")));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                     .AddEntityFrameworkStores<HighSchoolContext>();
