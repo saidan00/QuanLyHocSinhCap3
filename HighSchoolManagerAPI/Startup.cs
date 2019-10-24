@@ -5,9 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using HighSchoolManagerAPI.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using HighSchoolManagerAPI.Models;
+using ApplicationCore.Entities;
+using ApplicationCore.Interfaces;
+using Infrastructure.Persistence;
+using Infrastructure.Persistence.Repositories;
+using HighSchoolManagerAPI.Services;
+using HighSchoolManagerAPI.Helpers;
 
 namespace HighSchoolManagerAPI
 {
@@ -57,6 +61,37 @@ namespace HighSchoolManagerAPI
             });
 
             services.AddControllers();
+
+            /* Aggregates */
+            //services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
+            services.AddScoped<IClassRepository, ClassRepository>();
+            //services.AddScoped<IResultRepository, ResultRepository>();
+            //services.AddScoped<IConductRepository, ConductRepository>();
+
+            /* Standalone Aggregates */
+            services.AddScoped<ITeacherRepository, TeacherRepository>();
+            //services.AddScoped<ITeachingAssignmentRepository, TeachingAssignmeRepository>();
+            services.AddScoped<ISubjectRepository, SubjectRepository>();
+            services.AddScoped<IStudentRepository, StudentRepository>();
+            //services.AddScoped<ISemesterRepository, SemesterRepository>();
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            /* Aggregates */
+            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IClassService, ClassService>();
+            //services.AddScoped<IResultService, ResultService>();
+            //services.AddScoped<IConductService, ConductService>();
+
+            /* Standalone Aggregates */
+            services.AddScoped<ITeacherService, TeacherService>();
+            //services.AddScoped<ITeachingAssignmentService, TeachingAssignmeService>();
+            services.AddScoped<ISubjectService, SubjectService>();
+            services.AddScoped<IStudentService, StudentService>();
+            //services.AddScoped<ISemesterService, SemesterService>();
+
+            /* Helper(s) */
+            services.AddScoped<IExistHelper, ExistHelper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,37 +1,32 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using HighSchoolManagerAPI.Data;
-using HighSchoolManagerAPI.Models;
+using ApplicationCore.Entities;
 using HighSchoolManagerAPI.FrontEndModels;
 using Microsoft.AspNetCore.Authorization;
+using HighSchoolManagerAPI.Services;
 
 namespace HighSchoolManagerAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    // [Authorize]
     public class SubjectController : ControllerBase
     {
-        private readonly HighSchoolContext _context;
+        private readonly ISubjectService _subjectService;
 
-        public SubjectController(HighSchoolContext context)
+        public SubjectController(ISubjectService subjectService)
         {
-            _context = context;
+            _subjectService = subjectService;
         }
 
         // GET: api/Subject/Get
         [HttpGet("Get")]
-        public async Task<ActionResult> GetSubjects(int? subjectId, string name)
+        public ActionResult GetSubjects(int? subjectId, string name, string sort)
         {
             // filter by subjectId
             if (subjectId != null)
             {
-                var aSubject = await _context.Subjects.FindAsync(subjectId);
+                var aSubject = _subjectService.GetSubject((int)subjectId);
                 if (aSubject == null)
                 {
                     return NotFound();
@@ -39,29 +34,19 @@ namespace HighSchoolManagerAPI.Controllers
                 return Ok(aSubject);
             }
 
-            // if subjectId == null
+            // if studentId == null
 
-            var subjects =
-                from t in _context.Subjects
-                select t;
+            var subjects = _subjectService.GetSubjects(name, sort);
 
-            // filter by name
-            if (!String.IsNullOrEmpty(name))
-            {
-                subjects = subjects.Where(t => t.Name.Contains(name));
-            }
-
-            subjects = subjects.OrderBy(s => s.SubjectID);
-
-            return Ok(await subjects.ToListAsync());
+            return Ok(subjects);
         }
 
         // PUT: api/Subject/Edit?subjectId=5
         [HttpPut("Edit")]
-        [Authorize(Roles = "Manager")]
-        public async Task<ActionResult> EditSubject(int subjectId, SubjectModel model)
+        // [Authorize(Roles = "Manager, Subject")]
+        public ActionResult EditSubject(int subjectId, SubjectModel model)
         {
-            var subject = await _context.Subjects.FindAsync(subjectId);
+            var subject = _subjectService.GetSubject(subjectId);
 
             // if no subject is found
             if (subject == null)
@@ -72,14 +57,11 @@ namespace HighSchoolManagerAPI.Controllers
             // check if model matches with data annotation in front-end model
             if (ModelState.IsValid)
             {
-                //bind value
+                // bind value
                 subject.Name = model.Name;
 
-                // Update in DbSet
-                _context.Subjects.Update(subject);
-
-                // Save changes in database
-                await _context.SaveChangesAsync();
+                // save change
+                _subjectService.Update();
 
                 return Ok(subject);
             }
@@ -99,8 +81,8 @@ namespace HighSchoolManagerAPI.Controllers
 
         // POST: api/Subject/Create
         [HttpPost("Create")]
-        [Authorize(Roles = "Manager")]
-        public async Task<ActionResult> CreateSubject(SubjectModel model)
+        // [Authorize(Roles = "Manager")]
+        public ActionResult CreateSubject(SubjectModel model)
         {
             if (ModelState.IsValid)
             {
@@ -109,9 +91,10 @@ namespace HighSchoolManagerAPI.Controllers
                     Name = model.Name
                 };
 
-                await _context.Subjects.AddAsync(subject);
-                await _context.SaveChangesAsync();
-                return StatusCode(201, subject); // 201: Created
+                // create subject
+                _subjectService.CreateSubject(subject);
+
+                return StatusCode(201); // 201: Created
             }
             else
             {
@@ -130,10 +113,10 @@ namespace HighSchoolManagerAPI.Controllers
 
         // DELETE: api/Subject/Delete?subjectId=5
         [HttpDelete("Delete")]
-        [Authorize(Roles = "Manager")]
-        public async Task<ActionResult> DeleteSubject(int subjectId)
+        // [Authorize(Roles = "Manager")]
+        public ActionResult DeleteSubject(int subjectId)
         {
-            var subject = await _context.Subjects.FindAsync(subjectId);
+            var subject = _subjectService.GetSubject(subjectId);
 
             // if no subject is found
             if (subject == null)
@@ -141,10 +124,10 @@ namespace HighSchoolManagerAPI.Controllers
                 return NotFound();
             }
 
-            _context.Subjects.Remove(subject);
-            await _context.SaveChangesAsync();
+            // delete subject
+            _subjectService.DeleteSubject(subject);
 
-            return Ok(subject);
+            return Ok();
         }
     }
 }

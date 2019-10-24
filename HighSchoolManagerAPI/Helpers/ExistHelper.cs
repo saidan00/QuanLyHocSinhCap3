@@ -1,56 +1,46 @@
-using System.Linq;
-using HighSchoolManagerAPI.Data;
+using ApplicationCore.Interfaces;
 
 namespace HighSchoolManagerAPI.Helpers
 {
     // CHECK IF ENTITY EXISTS
-    public class ExistHelper
+    public class ExistHelper : IExistHelper
     {
-        private readonly HighSchoolContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ExistHelper(HighSchoolContext context)
+        public ExistHelper(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         public bool StudentExists(int? id)
         {
             id = id.HasValue ? id.Value : 0;
-            return _context.Students.Any(e => e.StudentID == id);
+            return (_unitOfWork.Student.GetBy((int)id) != null);
         }
 
         public bool TeacherExists(int? id)
         {
             id = id.HasValue ? id.Value : 0;
-            return _context.Teachers.Any(e => e.TeacherID == id);
+            return (_unitOfWork.Teacher.GetBy((int)id) != null);
         }
 
         public bool GradeExists(int? id)
         {
             id = id.HasValue ? id.Value : 0;
-            return _context.Grades.Any(e => e.GradeID == id);
-        }
-
-        public bool HeadTeacherExists(int? id)
-        {
-            id = id.HasValue ? id.Value : 0; // id = 0 -> teacher not exist
-            return _context.Teachers.Any(e => e.TeacherID == id);
+            return (_unitOfWork.Class.GetGrade((int)id) != null);
         }
 
         public bool ClassExists(int id)
         {
-            return _context.Classes.Any(e => e.ClassID == id);
+            return (_unitOfWork.Class.GetBy((int)id) != null);
         }
 
         // Check for unique index (Name, Year)
         public bool ClassExists(string name, int year)
         {
-            var aClass =
-                    from c in _context.Classes
-                    where c.Name == name && c.Year == year
-                    select c;
+            var aClass = _unitOfWork.Class.GetByNameAndYear(name, year);
 
-            return aClass.Any();
+            return (aClass != null);
         }
     }
 }
