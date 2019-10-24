@@ -1,14 +1,13 @@
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using HighSchoolManagerAPI.FrontEndModels;
 using HighSchoolManagerAPI.Helpers;
+using HighSchoolManagerAPI.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using System.Threading.Tasks;
+using ApplicationCore.Entities;
 using Microsoft.AspNetCore.Authorization;
-using HighSchoolManagerAPI.Models;
-using HighSchoolManagerAPI.Data;
-using System.Linq;
+using System;
 
 namespace HighSchoolManagerAPI.Controllers
 {
@@ -16,26 +15,20 @@ namespace HighSchoolManagerAPI.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly SignInManager<ApplicationUser> signInManager;
-        private readonly HighSchoolContext _context;
+        private readonly IAccountService _accountService;
         private ResponseHelper resp;
-        private ExistHelper exist;
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, HighSchoolContext context)
+        public AccountController(IAccountService accountService)
         {
-            this.signInManager = signInManager;
-            this.userManager = userManager;
-            _context = context;
+            _accountService = accountService;
             resp = new ResponseHelper();
-            exist = new ExistHelper(_context);
         }
 
         [HttpPost("Login")]
-        public async Task<ActionResult> Login(LoginModel model)
+        public async Task<ActionResult> LoginAsync(LoginModel model)
         {
             if (ModelState.IsValid)
             {
-                var result = await signInManager.PasswordSignInAsync(model.UserName, model.Password, isPersistent: false, false);
+                var result = await _accountService.LoginAsync(model.UserName, model.Password, isPersistent: false, false);
                 if (result.Succeeded)
                 {
                     return Ok();
@@ -62,23 +55,24 @@ namespace HighSchoolManagerAPI.Controllers
         }
 
         [HttpPost("Logout")]
-        public async Task<ActionResult> Logout()
+        public async Task<ActionResult> LogoutAsync()
         {
-            await signInManager.SignOutAsync();
+            await _accountService.LogoutAsync();
             return Ok();
         }
 
-        // we do not use 'register'
+        // we not use 'register' here
         [HttpPost("Create")]
-        public async Task<ActionResult> CreateUser(RegisterModel model)
+        [Authorize(Roles = "Manager")]
+        public async Task<ActionResult> CreateUserAsync(RegisterModel model)
         {
             if (ModelState.IsValid)
             {
                 // check if foreign key(s), unique key(s) are invalid
-                if (!IsKeysValid(model))
-                {
-                    return StatusCode(resp.code, resp);
-                }
+                // if (!IsKeysValid(model))
+                // {
+                //     return StatusCode(resp.code, resp);
+                // }
 
                 var user = new ApplicationUser
                 {
@@ -86,13 +80,13 @@ namespace HighSchoolManagerAPI.Controllers
                     TeacherID = model.TeacherID
                 };
 
-                var result = await userManager.CreateAsync(user, model.Password);
+                var result = await _accountService.CreateUserAsync(user, model.Password);
 
                 if (result.Succeeded)
                 {
                     // await signInManager.SignInAsync(user, isPersistent: false);
                     var defaultRole = "Teacher";
-                    await userManager.AddToRoleAsync(user, defaultRole);
+                    await _accountService.AddUserToRoleAsync(user, defaultRole);
 
                     return Ok();
                 }
@@ -142,58 +136,15 @@ namespace HighSchoolManagerAPI.Controllers
         // Get curret logged in user
         [HttpGet("CurrentUser")]
         [Authorize]
-        public Object CurrentUser()
+        public async Task<Object> CurrentUser()
         {
-            var userRoles = GetUserRoles(User.Identity.Name);
+            var userRoles = await _accountService.GetUserRolesAsync(User.Identity.Name);
             var currentUser = new
             {
                 userName = User.Identity.Name,
                 roles = userRoles
             };
             return currentUser;
-        }
-
-        [HttpGet("GetUserRoles")]
-        [Authorize]
-        public async Task<IList<string>> GetUserRoles(string UserName)
-        {
-            ApplicationUser user = await userManager.FindByNameAsync(UserName);
-            return await userManager.GetRolesAsync(user);
-        }
-
-        // GET: api/Account/GetUserName?teacherId=5
-        [HttpGet("GetUserName")]
-        // [Authorize]
-        public ActionResult<string> GetUserName(int? teacherId)
-        {
-            if (teacherId == null)
-            {
-                return BadRequest();
-            }
-
-            var aAccount =
-                _context.Users
-                .Where(a => a.TeacherID == teacherId)
-                .FirstOrDefault();
-
-            if (aAccount == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(aAccount.UserName);
-        }
-
-        private bool IsKeysValid(RegisterModel model)
-        {
-            if (!exist.TeacherExists(model.TeacherID))
-            {
-                resp.code = 404;
-                resp.messages.Add(new { Teacher = "Teacher not found" });
-                return false;
-            }
-
-            return true;
         }
     }
 }

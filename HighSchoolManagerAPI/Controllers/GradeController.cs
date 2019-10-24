@@ -1,14 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using HighSchoolManagerAPI.Data;
-using HighSchoolManagerAPI.Models;
-using HighSchoolManagerAPI.FrontEndModels;
+using HighSchoolManagerAPI.Services;
 
 namespace HighSchoolManagerAPI.Controllers
 {
@@ -17,48 +9,21 @@ namespace HighSchoolManagerAPI.Controllers
     //[Authorize(Roles = "Manager")]
     public class GradeController : ControllerBase
     {
-        private readonly HighSchoolContext _context;
-        public GradeController(HighSchoolContext context)
+        private readonly IClassService _classService;
+        public GradeController(IClassService classService)
         {
-            _context = context;
+            _classService = classService;
         }
 
-        //Create new grade 
-        [HttpPost("Create")]
-        public async Task<ActionResult> CreateGrade(GradeModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                Grade grade = new Grade
-                {
-                    Name = model.Name
-                };
-                await _context.Grades.AddAsync(grade);
-                await _context.SaveChangesAsync();
-                return StatusCode(201, grade); // 201 created
-            }
-            else
-            {
-                var errors = new List<string>();
-                foreach (var state in ModelState)
-                {
-                    foreach (var error in state.Value.Errors)
-                    {
-                        errors.Add(error.ErrorMessage);
-                    }
-                }
-                return BadRequest(errors); //400 bad request
-            }
-        }
-
-        //get grade list
+        // get grade list
+        // GET: api/Grade/Get -> get all
         [HttpGet("Get")]
-        public async Task<ActionResult> GetGrades(int? gradeId, string name)
+        public ActionResult GetGrades(int? gradeId, string name)
         {
             // filter by gradeId
             if (gradeId != null)
             {
-                var aGrade = await _context.Grades.FindAsync(gradeId);
+                var aGrade = _classService.GetGrade((int)gradeId);
                 if (aGrade == null)
                 {
                     return NotFound();
@@ -66,19 +31,10 @@ namespace HighSchoolManagerAPI.Controllers
                 return Ok(aGrade);
             }
 
-            // if gradeId == null
-            var grades =
-                from g in _context.Grades
-                select g;
-
-            // filter by name
-            if (!String.IsNullOrEmpty(name))
-            {
-                grades = grades.Where(g => g.Name.Contains(name));
-            }
+            var grades = _classService.GetGrades(name);
 
             grades = grades.OrderBy(g => g.GradeID);
-            return Ok(await grades.ToListAsync());
+            return Ok(grades);
         }
 
         //Put Grade

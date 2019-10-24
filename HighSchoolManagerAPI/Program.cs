@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using HighSchoolManagerAPI.Data;
+using Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HighSchoolManagerAPI
@@ -32,7 +32,7 @@ namespace HighSchoolManagerAPI
                 {
                     var context = services.GetRequiredService<HighSchoolContext>();
                     // context.Database.EnsureCreated();
-                    DbInitializer.Initialize(context);
+                    DataSeed.Initialize(context);
                 }
                 catch (Exception ex)
                 {

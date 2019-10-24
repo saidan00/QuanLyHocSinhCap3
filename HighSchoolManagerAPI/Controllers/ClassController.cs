@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using HighSchoolManagerAPI.Data;
-using HighSchoolManagerAPI.Models;
+using ApplicationCore.Entities;
+using Infrastructure.Persistence;
 using HighSchoolManagerAPI.FrontEndModels;
 using HighSchoolManagerAPI.Helpers;
 using Microsoft.Data.SqlClient;
+using HighSchoolManagerAPI.Services;
+using ApplicationCore.Interfaces;
 
 namespace HighSchoolManagerAPI.Controllers
 {
@@ -17,106 +19,43 @@ namespace HighSchoolManagerAPI.Controllers
     [ApiController]
     public class ClassController : ControllerBase
     {
-        private readonly HighSchoolContext _context;
+        private readonly IClassService _classService;
         private ResponseHelper resp;
-        private ExistHelper exist;
+        private IExistHelper exist;
 
-        public ClassController(HighSchoolContext context)
+        public ClassController(IClassService classService, IExistHelper exist)
         {
-            _context = context;
-            resp = new ResponseHelper();
-            exist = new ExistHelper(_context);
+            _classService = classService;
+            this.resp = new ResponseHelper();
+            this.exist = exist;
         }
 
         // GET: api/Class/Get -> Get all classes
         // GET: api/Class/Get?classId=2
         [HttpGet("Get")]
-        public async Task<ActionResult> GetClasses(int? classId, string name, int? year, int? gradeId, int? headTeacherId, string sort)
+        public ActionResult GetClasses(int? classId, string name, int? year, int? gradeId, int? headTeacherId, string sort)
         {
             // filter by classId
             if (classId != null)
             {
-                var aClass = await _context.Classes.FindAsync(classId);
+                var aClass = _classService.GetClass((int)classId);
                 if (aClass == null)
                 {
                     return NotFound();
                 }
                 return Ok(aClass);
             }
-
             // if classId == null
+            var classes = _classService.GetClasses(classId, name, year, gradeId, headTeacherId, sort);
 
-            var classes =
-                from c in _context.Classes
-                select c;
-
-            // filter by name
-            if (!String.IsNullOrEmpty(name))
-            {
-                classes = classes.Where(c => c.Name.Contains(name));
-            }
-
-            // filter by year
-            if (year != null)
-            {
-                classes = classes.Where(c => c.Year == year);
-            }
-
-            // filter by gradeId
-            if (gradeId != null)
-            {
-                classes = classes.Where(c => c.GradeID == gradeId);
-            }
-
-            // filter by headTeacherId
-            if (headTeacherId != null)
-            {
-                classes = classes.Where(c => c.HeadTeacherID == headTeacherId);
-            }
-
-            classes = classes.OrderBy(c => c.ClassID);
-
-            if (!String.IsNullOrEmpty(sort))
-            {
-                switch (sort)
-                {
-                    case "name":
-                        classes = classes.OrderBy(c => c.Name);
-                        break;
-                    case "name-desc":
-                        classes = classes.OrderByDescending(c => c.Name);
-                        break;
-                    case "grade":
-                        classes = classes.OrderBy(c => c.Grade.Name);
-                        break;
-                    case "grade-desc":
-                        classes = classes.OrderByDescending(c => c.Grade.Name);
-                        break;
-                    case "year":
-                        classes = classes.OrderBy(c => c.Year);
-                        break;
-                    case "year-desc":
-                        classes = classes.OrderByDescending(c => c.Year);
-                        break;
-                    case "teacher":
-                        classes = classes.OrderBy(c => c.Year);
-                        break;
-                    case "teacher-desc":
-                        classes = classes.OrderByDescending(c => c.Name);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            return Ok(await classes.ToListAsync());
+            return Ok(classes);
         }
 
         // PUT: api/Class/Edit?classId=5
         [HttpPut("Edit")]
-        public async Task<IActionResult> EditClass(int classId, ClassModel model)
+        public IActionResult EditClass(int classId, ClassModel model)
         {
-            var aClass = await _context.Classes.FindAsync(classId);
+            var aClass = _classService.GetClass(classId);
 
             // if no class is found
             if (aClass == null)
@@ -138,11 +77,7 @@ namespace HighSchoolManagerAPI.Controllers
                 aClass.GradeID = model.GradeID;
                 aClass.HeadTeacherID = model.HeadTeacherID;
 
-                // Update in DbSet
-                _context.Classes.Update(aClass);
-
-                // Save changes in database
-                await _context.SaveChangesAsync();
+                _classService.Update();
 
                 return Ok(aClass);
             }
@@ -162,7 +97,7 @@ namespace HighSchoolManagerAPI.Controllers
 
         // POST: api/Class/Create
         [HttpPost("Create")]
-        public async Task<ActionResult> CreateClass(ClassModel model)
+        public ActionResult CreateClass(ClassModel model)
         {
             if (ModelState.IsValid)
             {
@@ -180,9 +115,13 @@ namespace HighSchoolManagerAPI.Controllers
                     HeadTeacherID = model.HeadTeacherID
                 };
 
-                await _context.Classes.AddAsync(aClass);
+                _classService.CreateClass(aClass);
 
-                await _context.SaveChangesAsync();
+                Console.WriteLine(aClass.Name);
+                Console.WriteLine(aClass.Year);
+                Console.WriteLine(aClass.Size);
+                Console.WriteLine(aClass.GradeID);
+                Console.WriteLine(aClass.HeadTeacherID);
 
                 return StatusCode(201, aClass); // 201: Created
             }
@@ -200,67 +139,6 @@ namespace HighSchoolManagerAPI.Controllers
             }
         }
 
-        // DELETE: api/Class/Delete?classId=5
-        [HttpDelete("Delete")]
-        public async Task<ActionResult> DeleteClass(int classId)
-        {
-            var aClass = await _context.Classes.FindAsync(classId);
-
-            // if no class is found
-            if (aClass == null)
-            {
-                return NotFound();
-            }
-
-            _context.Classes.Remove(aClass);
-            await _context.SaveChangesAsync();
-
-            return Ok(aClass);
-        }
-
-        // PUT: aspi/Class/AddStudentsToClass?classId=5
-        // JSON: {"studentIds" : [1, 2, 3, 4]} (array of student id)
-        [HttpPut("AddStudentsToClass")]
-        public async Task<ActionResult> AddStudentsToClass(int classId, IdListModel model)
-        {
-            // if class exist
-            if (exist.ClassExists(classId))
-            {
-                foreach (var id in model.ids)
-                {
-                    Student student = await _context.Students.FindAsync(id);
-
-                    // check if student exist
-                    if (student == null)
-                    {
-                        resp.code = 404; // Not found
-                        resp.messages.Add(new { studentID = "Student ID " + id + " not found" });
-
-                        return NotFound(resp);
-                    }
-                    else
-                    {
-                        // bind value(s)
-                        student.ClassID = classId;
-
-                        _context.Students.Update(student);
-                    }
-                }
-
-                await _context.SaveChangesAsync();
-
-                return Ok();
-            }
-            // if no class found
-            else
-            {
-                resp.code = 404; // Not found
-                resp.messages.Add(new { classID = "Class ID does not exist" });
-
-                return NotFound(resp);
-            }
-        }
-
         private bool IsKeysValid(ClassModel model)
         {
             // Check if Grade ID exists
@@ -274,7 +152,7 @@ namespace HighSchoolManagerAPI.Controllers
             // check if Head Teacher exists
             if (model.HeadTeacherID != null)
             {
-                if (!exist.HeadTeacherExists(model.HeadTeacherID))
+                if (!exist.TeacherExists(model.HeadTeacherID))
                 {
                     resp.code = 404;
                     resp.messages.Add(new { HeadTeacherID = "Head teacher not found" });
@@ -294,29 +172,67 @@ namespace HighSchoolManagerAPI.Controllers
             return true;
         }
 
-        /* NOT DONE YET */
-        // GET: api/Class/NumberOfPossibleClasses?grade=10&year=2019
-        // [HttpGet("NumberOfPossibleClasses")]
-        // public async Task<ActionResult> NumberOfPossibleClasses(string grade, int year)
+        // should not use delete yet, maybe later
+        // DELETE: api/Class/Delete?classId=5
+        // [HttpDelete("Delete")]
+        [NonAction]
+        public ActionResult DeleteClass(int classId)
+        {
+            var aClass = _classService.GetClass(classId);
+
+            // if no class is found
+            if (aClass == null)
+            {
+                return NotFound();
+            }
+
+            _classService.DeleteClass(aClass);
+
+            return Ok(aClass);
+        }
+
+
+        // PUT: aspi/Class/AddStudentsToClass?classId=5
+        // JSON: {"studentIds" : [1, 2, 3, 4]} (array of student id)
+        // [HttpPut("AddStudentsToClass")]
+        // public async Task<ActionResult> AddStudentsToClass(int classId, IdListModel model)
         // {
-        //     int classMaxSize = 40;
-        //     int numberOfClasses = 0;
-        //     int numberOfStudentWithoutClass = 0;
+        //     // if class exist
+        //     if (exist.ClassExists(classId))
+        //     {
+        //         foreach (var id in model.ids)
+        //         {
+        //             Student student = await _context.Students.FindAsync(id);
 
-        //     // select student(s) that belong to <grade> and did not have class (classID = null)
-        //     var students =
-        //             from s in _context.Students
-        //             where s.Class.Grade.Name == grade && s.ClassID == null
-        //             select s;
+        //             // check if student exist
+        //             if (student == null)
+        //             {
+        //                 resp.code = 404; // Not found
+        //                 resp.messages.Add(new { studentID = "Student ID " + id + " not found" });
 
-        //     // Count number of student(s)
-        //     numberOfStudentWithoutClass = await students.CountAsync();
+        //                 return NotFound(resp);
+        //             }
+        //             else
+        //             {
+        //                 // bind value(s)
+        //                 student.ClassID = classId;
 
-        //     // Calculate number of class(es)
-        //     // exp: 81 students -> 81 / 40 = 2 -> 2 + 1 = 3 (classes)
-        //     numberOfClasses = (numberOfStudentWithoutClass / classMaxSize) + 1;
+        //                 _context.Students.Update(student);
+        //             }
+        //         }
 
-        //     return Ok(new { classes = numberOfClasses }); // exp: {"classes": 3}, Ok: 200
+        //         await _context.SaveChangesAsync();
+
+        //         return Ok();
+        //     }
+        //     // if no class found
+        //     else
+        //     {
+        //         resp.code = 404; // Not found
+        //         resp.messages.Add(new { classID = "Class ID does not exist" });
+
+        //         return NotFound(resp);
+        //     }
         // }
     }
 }

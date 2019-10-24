@@ -1,36 +1,34 @@
 using Microsoft.AspNetCore.Mvc;
-using HighSchoolManagerAPI.FrontEndModels;
 using HighSchoolManagerAPI.Helpers;
 using Microsoft.AspNetCore.Identity;
-using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Authorization;
-using HighSchoolManagerAPI.Models;
+using HighSchoolManagerAPI.Services;
+using System.Threading.Tasks;
+using HighSchoolManagerAPI.FrontEndModels;
+using ApplicationCore.Entities;
 
 namespace HighSchoolManagerAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
-    public class AdministratorController : ControllerBase
+    // [Authorize(Roles = "Admin")]
+    public class Administrator2Controller : ControllerBase
     {
-        private readonly RoleManager<IdentityRole> roleManager;
-        private readonly UserManager<ApplicationUser> userManager;
+        private readonly IAccountService _accountService;
         private ResponseHelper resp;
-        public AdministratorController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
+        public Administrator2Controller(IAccountService accountService)
         {
-            this.roleManager = roleManager;
-            this.userManager = userManager;
+            _accountService = accountService;
             resp = new ResponseHelper();
         }
 
         // Get all roles
-        [HttpGet("Roles")]
-        public IEnumerable<IdentityRole> GetRoles()
+        [HttpGet("GetRoles")]
+        public ActionResult<IEnumerable<IdentityRole>> GetRoles()
         {
-            var roles = roleManager.Roles;
-            return roles;
+            var roles = _accountService.GetRoles();
+            return Ok(roles);
         }
 
         [HttpPost("CreateRole")]
@@ -42,15 +40,17 @@ namespace HighSchoolManagerAPI.Controllers
                 {
                     Name = model.RoleName
                 };
-                IdentityResult result = await roleManager.CreateAsync(identityRole);
+
+                IdentityResult result = await _accountService.CreateRoleAsync(identityRole);
+
                 if (result.Succeeded)
                 {
-                    return StatusCode(200);
+                    return StatusCode(200); // 200: Ok
                 }
                 else
                 {
                     var errors = result.Errors;
-                    return BadRequest(errors);
+                    return BadRequest(errors); // 400: BadRequest
                 }
             }
             else
@@ -63,90 +63,43 @@ namespace HighSchoolManagerAPI.Controllers
                         errors.Add(error.ErrorMessage);
                     }
                 }
-                return BadRequest(errors);
+                return BadRequest(errors); // 400: BadRequest
             }
         }
 
-        [HttpPost("AddUserToRole")]
-        public async Task<ActionResult> AddUserToRole(string UserName, string RoleName)
+        // User - Role: One - One Relationship
+        // PUT: api/Administrator/ChangeUserRole?userName=abc&role=xyz
+        [HttpPut("ChangeUserRole")]
+        public async Task<ActionResult> ChangeUserRole(string userName, string role)
         {
-            var user = await userManager.FindByNameAsync(UserName);
+            var user = await _accountService.GetUserAsync(userName);
+            // if user exist
             if (user == null)
             {
                 resp.code = 404;
-                resp.messages.Add("User " + UserName + " not found");
+                resp.messages.Add("User " + userName + " not found");
                 return NotFound(resp);
             }
 
-            var role = await roleManager.FindByNameAsync(RoleName);
-            if (role == null)
+            var identityRole = await _accountService.GetRoleAsync(role);
+            // if role exist
+            if (identityRole == null)
             {
                 resp.code = 404;
-                resp.messages.Add("Role " + RoleName + " not found");
+                resp.messages.Add("Role " + role + " not found");
                 return NotFound(resp);
             }
 
-            // if user is not in role
-            if (!(await userManager.IsInRoleAsync(user, RoleName)))
-            {
-                IdentityResult result = await userManager.AddToRoleAsync(user, RoleName);
-                if (result.Succeeded)
-                {
-                    return Ok();
-                }
-                else
-                {
-                    var errors = result.Errors;
-                    return BadRequest(errors);
-                }
-            }
-            else
-            {
-                resp.code = 400;
-                resp.messages.Add("User " + UserName + " is already in role " + RoleName);
-                return BadRequest(resp);
-            }
-        }
+            // Get user current role(s)
+            var currentUserRoles = await _accountService.GetUserRolesAsync(user.UserName);
 
-        [HttpPost("RemoveUserFromRole")]
-        public async Task<ActionResult> RemoveUserFromRole(string UserName, string RoleName)
-        {
-            var user = await userManager.FindByNameAsync(UserName);
-            if (user == null)
-            {
-                resp.code = 404;
-                resp.messages.Add("User " + UserName + " not found");
-                return NotFound(resp);
-            }
+            // Remove user from current role(s)
+            await _accountService.RemoveFromRolesAsync(user, currentUserRoles);
 
-            var role = await roleManager.FindByNameAsync(RoleName);
-            if (role == null)
-            {
-                resp.code = 404;
-                resp.messages.Add("Role " + RoleName + " not found");
-                return NotFound(resp);
-            }
+            // Add user to new role
+            await _accountService.AddUserToRoleAsync(user, role);
 
-            // if user is in role
-            if (await userManager.IsInRoleAsync(user, RoleName))
-            {
-                IdentityResult result = await userManager.RemoveFromRoleAsync(user, RoleName);
-                if (result.Succeeded)
-                {
-                    return Ok();
-                }
-                else
-                {
-                    var errors = result.Errors;
-                    return BadRequest(errors);
-                }
-            }
-            else
-            {
-                resp.code = 400;
-                resp.messages.Add("User " + UserName + " is not in role " + RoleName);
-                return BadRequest(resp);
-            }
+            return Ok();
         }
     }
 }
