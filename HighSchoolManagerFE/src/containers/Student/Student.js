@@ -1,5 +1,5 @@
 import React, {Component, Fragment} from 'react';
-import {Link} from 'react-router-dom';
+import {Link, Route} from 'react-router-dom';
 import {Input, Select, Table} from 'antd';
 import moment from 'moment';
 import styles from './Student.module.css';
@@ -8,12 +8,14 @@ import Request from '../../common/commonRequest';
 import Params from '../../common/commonParams';
 import LoadScreen from '../../components/UI/LoadScreen/LoadScreen';
 import Card from '../../components/UI/Card/Card';
+import EditStudentModal from '../../components/Partial/EditStudent/EditStudent';
 
-const {Option} = Select;
+const {Option, OptGroup} = Select;
 
 class Student extends Component {
   state = {
     loading: true,
+    callUpdate: false,
     updating: false,
     students: [],
     grades: [],
@@ -21,23 +23,22 @@ class Student extends Component {
     filters: {
       name: '',
       gradeID: '',
-      //classID: null,
+      classID: null,
     },
   };
-  tableColumns = [ 
+  tableColumns = [
     {title: 'Class', dataIndex: 'classLabel', width: 75},
     {title: 'Year', dataIndex: 'classYear', width: 75},
     {title: 'Last Name', dataIndex: 'lastName', width: 200, sorter: (a,b) => a.lastName.localeCompare(b.lastName), sortDirections: ['ascend', 'descend']},
-    {title: 'First Name', dataIndex: 'firstName', width: 200, sorter: (a,b) => a.firstName.localeCompare(b.firstName), sortDirections: ['ascend', 'descend']},
+    {title: 'First Name', dataIndex: 'firstName', width: 150, sorter: (a,b) => a.firstName.localeCompare(b.firstName), sortDirections: ['ascend', 'descend']},
+    {title: 'Gender', dataIndex: 'gender', width: 100, sorter: (a,b) => a.gender.localeCompare(b.gender), sortDirections: ['ascend', 'descend']},
     {title: 'DOB', dataIndex: 'birthdayFormatted', width: 200, sorter: (a, b) => a.birthday.isAfter(b.birthday), sortDirections: ['descend']},
     {title: 'Address', dataIndex: 'address'},
-    {title: 'Actions', width: 200, fixed: 'right', render: (text, record, index) => {
+    {title: 'Actions', width: 80, fixed: 'right', render: (text, record, index) => {
       return (
-        <Fragment>
-          <Link to={`/Result/Edit/${record.key}`}>Results</Link> |&nbsp;
-          <Link to={`/Conduct/Edit/${record.key}`}>Conducts</Link> |&nbsp;
-            <Link to={`/Student/Edit/${record.key}`}><b>Edit</b></Link>
-        </Fragment>
+        <div style={{display: 'flex', justifyContent: 'center'}}>
+          <Link to={`/Student/Edit/${record.key}`}><b>Edit</b></Link>
+        </div>
       );
     }},
   ]
@@ -48,9 +49,10 @@ class Student extends Component {
   }
 
   async componentDidUpdate() {
-    if (this.state.updating) {
+    if (this.state.callUpdate) {
+      this.setState({callUpdate: false});
+      await Promise.all([this.fetchStudents(), this.fetchClasses()]);
       this.setState({updating: false});
-      await this.fetchStudents();
     }
   }
 
@@ -65,7 +67,13 @@ class Student extends Component {
   async fetchClasses() {
     const searchParams = Params.getSearchParamsFromObj(this.state.filters, ['gradeID']);
     await Request.get('/Class/Get?'+searchParams, 'cred', response => {
-      let _classes = response.data;
+      let _classes = response.data.reduce((classesArr, cls) => {
+        if (!classesArr[cls.year]) {
+          classesArr[cls.year] = [];
+        }
+        classesArr[cls.year].push(cls);
+        return classesArr;
+      }, {});
       this.setState({classes: _classes});
     });
   }
@@ -80,34 +88,46 @@ class Student extends Component {
         newStudent.classYear = (_student.class) ? _student.class.year : <i>None</i>;
         newStudent.lastName = _student.lastName;
         newStudent.firstName = _student.firstName;
-        //newStudent.gender = _student.gender; //TODO: Add Gender
+        newStudent.gender = _student.gender;
         newStudent.birthday = moment(_student.birthday, 'YYYY/MM/DD');
         newStudent.birthdayFormatted = newStudent.birthday.format('DD/MM/YYYY');
         newStudent.address = _student.address;
+        newStudent.class = _student.class;
         return newStudent;
       });
-      this.setState({students: newStudents, classes: []});
+      this.setState({students: newStudents});
     });
   }
 
   filterOnChangeHandler = (event, key) => {
     const value = event ? (event.target ? event.target.value : event) : null;
-    this.setState(prevState => {
-      let _filters = {...prevState.filters};
-      _filters[key] = value;
-      return {filters: _filters, updating: true};
-    });
+    let _filters = {...this.state.filters};
+    _filters[key] = value;
+    if (_filters.gradeID !== this.state.filters.gradeID) {
+      _filters.classID = null;
+    }
+    this.setState({filters: _filters});
+    if (key !== 'name')
+      this.setState({callUpdate: true, updating: true});
   };
+
+  finishEditing = () => {
+    this.props.history.push('/Student');
+    this.setState({callUpdate: true, updating: true});
+  }
 
   render() {
     return (
       <Fragment>
+        <Route path="/Student/Edit/:id" render={(props) => (
+          <EditStudentModal studentID={parseInt(props.match.params.id)} finish={this.finishEditing} />
+        )} />
         {this.state.loading ? (
           <LoadScreen style={{position: 'fixed', top: '64px', left: '225px'}} />
         ) : (
-          <div className={styles.Student}>
+          <div className={[styles.Student, styles.FadeWrapper].join(' ')}>
             <h1>Students</h1>
-            <p>{this.state.students.length} Students, ? Classes</p>
+            <p>Look up and edit students information</p>
             <Card style={{height: 'calc(100vh - 232px)', flexDirection: 'column'}} >
               <div className={styles.FilterWrapper}>
                 <div>
@@ -117,6 +137,8 @@ class Student extends Component {
                     placeholder="Student name"
                     value={this.state.filters.name}
                     onChange={event => this.filterOnChangeHandler(event, 'name')}
+                    onKeyPress={event => {if (event.key === 'Enter') {this.setState({callUpdate: true, updating: true})}}}
+                    onBlur={() => {this.setState({callUpdate: true, updating: true})}}
                   />
                 </div>
                 <div>
@@ -127,10 +149,10 @@ class Student extends Component {
                     value={this.state.filters.gradeID}
                     onChange={event => this.filterOnChangeHandler(event, 'gradeID')}
                   >
-                    <Option key="gradeFilter-None" value="">None</Option>
+                    <Option value="">All</Option>
                     {this.state.grades.map(e => {
                       return (
-                        <Option key={`gradeFilter-${e.gradeID}`} value={e.gradeID}>
+                        <Option key={e.gradeID} value={e.gradeID}>
                           {e.name}
                         </Option>
                       );
@@ -146,18 +168,31 @@ class Student extends Component {
                     onChange={event => this.filterOnChangeHandler(event, 'classID')}
                     disabled={!this.state.filters.gradeID}
                   >
-                    {this.state.classes.map(e => {
-                      return (
-                        <Option key={`classFilter-${e.classID}`} value={e.classID}>
-                          {e.name}
-                        </Option>
-                      );
-                    })}
+                    <Option value="">All</Option>
+                    {Object.keys(this.state.classes).reverse().map(year => (
+                      <OptGroup key={year} value={"disabled"+year} title={year} disabled>
+                        {this.state.classes[year].map(c => (
+                          <Option key={c.classID} value={c.classID}>
+                            {c.name}
+                          </Option>
+                        ))}
+                      </OptGroup>
+                    ))}
                   </Select>
                 </div>
               </div>
               <div className={styles.TableWrapper}>
-                <Table columns={this.tableColumns} dataSource={this.state.students} scroll={{x: 1300, y: 'calc(100vh - 362px)'}} pagination={false} />
+                <div style={{
+                  height: 'calc(100vh - 360px)',
+                  border: 'thin solid #e8e8e8',
+                  borderRadius: '4px'
+                }}>
+                  {this.state.updating ? <LoadScreen /> :
+                    <div className={styles.FadeWrapper}>
+                      <Table columns={this.tableColumns} dataSource={this.state.students} scroll={{x: 1300, y: 'calc(100vh - 417px)'}} pagination={false} bordered />
+                    </div>
+                  }
+                </div>
               </div>
             </Card>
           </div>

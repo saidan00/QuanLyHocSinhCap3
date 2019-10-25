@@ -1,6 +1,7 @@
 import React, {Component, Fragment} from 'react';
 import {Redirect} from 'react-router-dom';
 import Request from '../../common/commonRequest';
+import AuthContext from '../../context/auth-context';
 
 class AuthRoute extends Component {
   //props: role
@@ -8,7 +9,9 @@ class AuthRoute extends Component {
     loading: true,
     isAuthen: false,
     isAuthor: false,
-    role: [],
+    role: '',
+    username: '',
+    teacher: {},
   };
 
   async componentDidMount() {
@@ -28,11 +31,11 @@ class AuthRoute extends Component {
       console.log('FINISHED doAuth', this.state.isAuthen);
     });
   }
-  async getUserRole() {
-    console.log('START getUserRole');
+  async getUserInfo() {
+    console.log('START getUserInfo');
     await Request.get('/Account/currentUser', 'cred', response => {
-      this.setState({role: response.data.roles.result});
-      console.log('FINISHED getUserRole: ' + this.state.role);
+      this.setState({username: response.data.userName, role: response.data.roles, teacher: response.data.teacher});
+      console.log('FINISHED getUserInfo: ' + this.state.username, this.state.role);
     });
   }
   async doAuthorize() {
@@ -43,28 +46,37 @@ class AuthRoute extends Component {
       this.setState({isAuthor: true});
       return;
     }
-    await this.getUserRole();
+    await this.getUserInfo();
     const userRole = this.state.role;
     console.log('allowedRoles: ', allowedRoles, 'currentUser role:', userRole);
-    if (allowedRoles.filter(role => userRole.includes(role)).length > 0)
+    if (allowedRoles.filter(role => userRole === role).length > 0)
       this.setState({isAuthor: true});
   }
 
   render() {
     return (
-      <Fragment>
-        {!this.state.loading ? (
-          this.state.isAuthen ? (
-            this.state.isAuthor ? (
-              this.props.children
+      <AuthContext.Provider value={{
+        isAuthen: this.state.isAuthen,
+        isAuthor: this.state.isAuthor,
+        user: {
+          username: this.state.username,
+          role: this.state.role,
+        }
+      }}>
+        <Fragment>
+          {!this.state.loading ? (
+            this.state.isAuthen ? (
+              this.state.isAuthor ? (
+                this.props.children
+              ) : (
+                <p>Access Denied</p>
+              )
             ) : (
-              <p>Access Denied</p>
+              <Redirect to="/Login" />
             )
-          ) : (
-            <Redirect to="/Login" />
-          )
-        ) : null}
-      </Fragment>
+          ) : null}
+        </Fragment>
+      </AuthContext.Provider>
     );
   }
 }
