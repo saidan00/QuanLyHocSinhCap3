@@ -8,8 +8,13 @@ const button = props => {
       className={[styles.Button, styles[props.color]].join(' ')}
       onClick={props.clicked}
       disabled={props.disabled}
-      >
-      <div>{props.children}</div>
+    >
+      <div>
+        {!props.icon ? null : (
+          <i className={"fas fa-fw "+props.icon} style={{marginRight: '10px'}}></i>
+        )}
+        {props.children}
+      </div>
     </button>
   );
 };

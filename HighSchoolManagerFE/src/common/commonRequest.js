@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {message} from 'antd';
 
 class CommonRequest {
   static optionsList = {
@@ -42,6 +43,14 @@ class CommonRequest {
     if (typeof catchFunc !== "undefined")
       req.catch(error => catchFunc(error));
     return req;
+  }
+
+  static showError(error) {
+    error.response.data.messages.forEach(m => {
+      Object.keys(m).forEach(mKey => {
+        message.error(m[mKey])
+      });
+    });
   }
 }
 

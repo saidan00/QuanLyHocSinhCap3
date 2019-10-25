@@ -7,13 +7,19 @@
   position: relative;
   font-weight: 400;
   padding-left: 64px;
+  border-left: 4px solid transparent;
 }
 
-.SidedrawerMenuItem.active,
 .SidedrawerMenuItem:hover {
   color: #1e88e5;
   text-decoration: none;
   cursor: pointer;
+}
+
+.SidedrawerMenuItem.active {
+  color: #1e88e5;
+  text-decoration: none;
+  border-left: 4px solid #1e88e5;
 }
 
 
