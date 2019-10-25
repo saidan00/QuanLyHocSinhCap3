@@ -1,4 +1,4 @@
-.Student {
+.FadeWrapper {
   animation-name: fadeIn;
   animation-duration: 0.5s;
 }
@@ -34,6 +34,5 @@
 }
 
 .Student .TableWrapper {
-  overflow: scroll;
   height: calc(100vh - 362px);
 }

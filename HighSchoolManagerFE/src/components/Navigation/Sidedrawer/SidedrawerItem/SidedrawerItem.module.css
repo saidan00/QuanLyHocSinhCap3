@@ -3,17 +3,19 @@
   color: #5f6368;
   text-decoration: none;
   width: 100%;
-  height: 100%;
+  height: 64px;
   display: inline-block;
   position: relative;
+  overflow-y: hidden;
   font-weight: 500;
   transition: 0.15s ease-out;
-  transition-property: background-color, border, color, box-shadow;
+  transition-property: background-color, border, color, box-shadow, height;
 }
 
-.SidedrawerWrapper:has(+ .SidedrawerItem.active) {
+.SidedrawerWrapper.WrapperActive {
   background-color: #ffffff;
   box-shadow: -3px 0px 1px 2px #bbbbbb33;
+  height: initial;
   z-index: 20;
 }
 
@@ -24,15 +26,30 @@
   padding: 10px;
   color: #5f6368;
   font-weight: 500;
+  border-left: 4px solid transparent;
   align-items: center;
   transition: 0.15s ease-out;
   transition-property: background-color, border, color, box-shadow;
 }
 
 .SidedrawerItem:hover {
+  cursor: pointer;
+}
+
+.SidedrawerItem:hover,
+.SidedrawerItem.active {
   color: #1e88e5;
   text-decoration: none;
-  cursor: pointer;
+  border-left: 4px solid #1e88e5;
+}
+
+.SidedrawerItem > .label {
+  transition: 0.15s;
+  transition-property: transform;
+}
+
+.SidedrawerItem:active > .label {
+  transform: scale(0.9, 0.9);
 }
 
 .SidedrawerItem > .indicator {
@@ -49,72 +66,3 @@
   border: 2px solid #6ab7ff;
   box-shadow: 0 0 10px #6ab7ff;
 }
-
-/*
-.SidedrawerItem {
-  font-size: 16px;
-  color: #5f6368;
-  text-decoration: none;
-  width: 100%;
-  display: inline-block;
-  position: relative;
-  font-weight: 500;
-  transition: 0.15s ease-out;
-  transition-property: background-color, border, color, box-shadow;
-}
-
-.SidedrawerWrapper {
-  display: flex;
-  align-items: center;
-  height: 64px;
-  width: 100%;
-  padding: 10px;
-  transition: 0.15s ease-out;
-  transition-property: background-color, border, color, box-shadow;
-}
-
-.SidedrawerWrapper > .label {
-  transition: 0.15s;
-  transition-property: transform;
-}
-
-.SidedrawerWrapper:hover,
-.SidedrawerItem.active .SidedrawerWrapper {
-  color: #1e88e5;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.SidedrawerWrapper:active > .label {
-  transform: scale(0.9, 0.9);
-}
-
-.SidedrawerItem.active {
-  background-color: #ffffff;
-  box-shadow: -3px 0px 1px 2px #bbbbbb33;
-  z-index: 20;
-}
-
-.SidedrawerWrapper > .indicator {
-  position: fixed;
-  left: 0px;
-  width: 3px;
-  height: 64px;
-  border: 0 solid transparent;
-  transition: 0.15s ease-out;
-  transition-property: border, box-shadow;
-}
-
-.SidedrawerWrapper:hover > .indicator {
-  border: 2px solid #6ab7ff;
-  box-shadow: 0 0 10px #6ab7ff;
-}
-
-.SidedrawerMenu {
-  display: none;
-}
-
-.SidedrawerItem.active .SidedrawerMenu {
-  display: block;
-}
-*/

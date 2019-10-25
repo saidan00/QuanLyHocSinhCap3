@@ -1,54 +1,74 @@
 import React, {Component, Fragment} from 'react';
 import styles from './Sidedrawer.module.css';
-import Request from '../../../common/commonRequest';
 import Auth from '../../../common/commonAuth';
+import AuthContext from '../../../context/auth-context';
 import LoadScreen from '../../UI/LoadScreen/LoadScreen';
 import SidedrawerItem from './SidedrawerItem/SidedrawerItem';
 import SidedrawerMenuItem from './SidedrawerMenuItem/SidedrawerMenuItem';
 
 class Sidedrawer extends Component {
   state = {
-    loading: true,
-    sidedrawerType: null,
+    loading: false,
+    currentPage: "",
   }
 
-  async componentDidMount() {
-    const sidedrawerType1 = await Auth.isInRoles(["Manager", "Teacher"]);
-    if (sidedrawerType1)
-      this.setState({sidedrawerType: 1});
-      this.setState({loading: false});
+  onClickHandler = (_page) => {
+    if (this.state.currentPage !== _page)
+      this.setState({currentPage: _page});
+  }
+
+  componentDidMount() {
+    this.setState({currentPage: window.location.pathname.split('/')[1]});
+  }
+  componentDidUpdate() {
   }
 
   render() {
     return (
-      <div className={styles.Sidedrawer}>
-        {this.state.loading ? <LoadScreen /> :
-          <ul>
-            <SidedrawerItem link="/" label="Home" icon="fa-home" exact>
-            </SidedrawerItem>
-            {this.state.sidedrawerType===1 ? (
-              <Fragment>
-                <SidedrawerItem link="/Student" label="Students" icon="fa-users">
-                  <SidedrawerMenuItem link="/Student/MyClass" label="My Class" />
-                  <SidedrawerMenuItem link="/Student/AddStudent" label="Add Student" />
-                  <SidedrawerMenuItem link="/Student/ClassManager" label="Class Manager" />
+      <AuthContext.Consumer>
+        {context => (
+          <div className={styles.Sidedrawer}>
+            {!context.user.role ? <LoadScreen /> :
+              <ul>
+                <SidedrawerItem link="/" label="Home" icon="fa-home" exact isactive={this.state.currentPage === ""} clicked={() => this.onClickHandler('')}>
                 </SidedrawerItem>
-                <SidedrawerItem link="/Result" label="Results" icon="fa-graduation-cap">
-                  <SidedrawerMenuItem link="/Result/View" label="View" />
-                  <SidedrawerMenuItem link="/Result/Manage" label="Manage" />
-                </SidedrawerItem>
-                <SidedrawerItem link="/Conduct" label="Conduct" icon="fa-clipboard-list">
-                  <SidedrawerMenuItem link="/Conduct/Violations" label="Violation Record" />
-                  <SidedrawerMenuItem link="/Conduct/RulesManager" label="Rules Manager" />
-                </SidedrawerItem>
-                <SidedrawerItem link="/Report" label="Report" icon="fa-chart-bar">
-                  <SidedrawerMenuItem link="/Report/Create" label="Create Report" />
-                </SidedrawerItem>
-              </Fragment>
-            ) : null}
-          </ul>
-        }
-      </div>
+                {Auth.isInRoles(context.user.role, ["Manager", "Teacher"]) ? (
+                  <Fragment>
+                    <SidedrawerItem link="/Student" label="Students" icon="fa-users" exact
+                      isactive={this.state.currentPage === "Student"}
+                      clicked={() => this.onClickHandler('Student')}
+                    >
+                      <SidedrawerMenuItem link="/Student/MyClass" label="My Class" />
+                      <SidedrawerMenuItem link="/Student/AddStudent" label="Add Student" />
+                      <SidedrawerMenuItem link="/Student/ClassManager" label="Class Manager" />
+                    </SidedrawerItem>
+                    <SidedrawerItem link="/Result" label="Results" icon="fa-graduation-cap" exact
+                      isactive={this.state.currentPage === "Result"}
+                      clicked={() => this.onClickHandler('Result')}
+                    >
+                      <SidedrawerMenuItem link="/Result/View" label="View" />
+                      <SidedrawerMenuItem link="/Result/Manage" label="Manage" />
+                    </SidedrawerItem>
+                    <SidedrawerItem link="/Conduct" label="Conduct" icon="fa-clipboard-list" exact
+                      isactive={this.state.currentPage === "Conduct"}
+                      clicked={() => this.onClickHandler('Conduct')}
+                    >
+                      <SidedrawerMenuItem link="/Conduct/Violations" label="Violation Record" />
+                      <SidedrawerMenuItem link="/Conduct/RulesManager" label="Rules Manager" />
+                    </SidedrawerItem>
+                    <SidedrawerItem link="/Report" label="Report" icon="fa-chart-bar" exact
+                      isactive={this.state.currentPage === "Report"}
+                      clicked={() => this.onClickHandler('Report')}
+                    >
+                      <SidedrawerMenuItem link="/Report/Create" label="Create Report" />
+                    </SidedrawerItem>
+                  </Fragment>
+                ) : null}
+              </ul>
+            }
+          </div>
+        )}
+      </AuthContext.Consumer>
     );
   }
 
