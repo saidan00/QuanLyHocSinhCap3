@@ -11,7 +11,7 @@ namespace ApplicationCore.Entities
 
         public int Year { get; set; }
 
-        public virtual List<Conduct> Conducts { get; set; }
-        public virtual List<Result> Results { get; set; }
+        // public virtual List<Conduct> Conducts { get; set; }
+        // public virtual List<Result> Results { get; set; }
     }
 }

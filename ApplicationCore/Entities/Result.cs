@@ -21,6 +21,6 @@ namespace ApplicationCore.Entities
 
         public virtual Subject Subject { get; set; }
 
-        public virtual List<ResultDetail> ResultDetails { get; set; }
+        // public virtual List<ResultDetail> ResultDetails { get; set; }
     }
 }

@@ -23,10 +23,11 @@ namespace ApplicationCore.Entities
         public int? ClassID { get; set; }
 
         public virtual Class Class { get; set; }
-        public virtual List<Conduct> Conducts { get; set; }
-        public virtual List<Result> Results { get; set; }
+        // public virtual List<Conduct> Conducts { get; set; }
+        // public virtual List<Result> Results { get; set; }
 
-        public Student() {
+        public Student()
+        {
             EnrollDate = DateTime.Today;
         }
     }
