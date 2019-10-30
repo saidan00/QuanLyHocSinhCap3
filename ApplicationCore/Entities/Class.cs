@@ -20,8 +20,8 @@ namespace ApplicationCore.Entities
 
         public virtual Grade Grade { get; set; }
         public virtual Teacher HeadTeacher { get; set; }
-        public virtual List<Student> Students { get; set; }
-        public virtual List<TeachingAssignment> TeachingAssignments { get; set; }
+        // public virtual List<Student> Students { get; set; }
+        // public virtual List<TeachingAssignment> TeachingAssignments { get; set; }
 
     }
 }

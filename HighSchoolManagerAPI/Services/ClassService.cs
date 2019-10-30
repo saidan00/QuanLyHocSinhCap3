@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace HighSchoolManagerAPI.Services
 {
@@ -22,7 +23,7 @@ namespace HighSchoolManagerAPI.Services
 
         public IEnumerable<Class> GetClasses(int? classId, string name, int? year, int? gradeId, int? headTeacherId, string sort)
         {
-            var classes = _unitOfWork.Class.GetAll();
+            var classes = _unitOfWork.Class.GetAll().Include(c => c.Grade).Include(c => c.HeadTeacher).AsQueryable();
 
             // filter by name
             if (!String.IsNullOrEmpty(name))

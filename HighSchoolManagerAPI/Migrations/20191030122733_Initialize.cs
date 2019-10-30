@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace HighSchoolManagerAPI.Migrations
 {
-    public partial class AddingIdentity : Migration
+    public partial class Initialize : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -19,31 +19,6 @@ namespace HighSchoolManagerAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetRoles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetUsers",
-                columns: table => new
-                {
-                    Id = table.Column<string>(nullable: false),
-                    UserName = table.Column<string>(maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
-                    Email = table.Column<string>(maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(nullable: false),
-                    PasswordHash = table.Column<string>(nullable: true),
-                    SecurityStamp = table.Column<string>(nullable: true),
-                    ConcurrencyStamp = table.Column<string>(nullable: true),
-                    PhoneNumber = table.Column<string>(nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
-                    LockoutEnabled = table.Column<bool>(nullable: false),
-                    AccessFailedCount = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -107,6 +82,7 @@ namespace HighSchoolManagerAPI.Migrations
                     TeacherID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(nullable: true),
+                    Gender = table.Column<string>(nullable: true),
                     Birthday = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
@@ -133,6 +109,67 @@ namespace HighSchoolManagerAPI.Migrations
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    UserName = table.Column<string>(maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
+                    Email = table.Column<string>(maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(nullable: false),
+                    PasswordHash = table.Column<string>(nullable: true),
+                    SecurityStamp = table.Column<string>(nullable: true),
+                    ConcurrencyStamp = table.Column<string>(nullable: true),
+                    PhoneNumber = table.Column<string>(nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
+                    LockoutEnabled = table.Column<bool>(nullable: false),
+                    AccessFailedCount = table.Column<int>(nullable: false),
+                    TeacherID = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUsers_Teachers_TeacherID",
+                        column: x => x.TeacherID,
+                        principalTable: "Teachers",
+                        principalColumn: "TeacherID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Classes",
+                columns: table => new
+                {
+                    ClassID = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(nullable: true),
+                    Year = table.Column<int>(nullable: false),
+                    Size = table.Column<int>(nullable: false),
+                    GradeID = table.Column<int>(nullable: false),
+                    HeadTeacherID = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Classes", x => x.ClassID);
+                    table.ForeignKey(
+                        name: "FK_Classes_Grades_GradeID",
+                        column: x => x.GradeID,
+                        principalTable: "Grades",
+                        principalColumn: "GradeID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Classes_Teachers_HeadTeacherID",
+                        column: x => x.HeadTeacherID,
+                        principalTable: "Teachers",
+                        principalColumn: "TeacherID",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -221,35 +258,6 @@ namespace HighSchoolManagerAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Classes",
-                columns: table => new
-                {
-                    ClassID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true),
-                    Year = table.Column<int>(nullable: false),
-                    Size = table.Column<int>(nullable: false),
-                    GradeID = table.Column<int>(nullable: false),
-                    HeadTeacherID = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Classes", x => x.ClassID);
-                    table.ForeignKey(
-                        name: "FK_Classes_Grades_GradeID",
-                        column: x => x.GradeID,
-                        principalTable: "Grades",
-                        principalColumn: "GradeID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Classes_Teachers_HeadTeacherID",
-                        column: x => x.HeadTeacherID,
-                        principalTable: "Teachers",
-                        principalColumn: "TeacherID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Students",
                 columns: table => new
                 {
@@ -257,8 +265,10 @@ namespace HighSchoolManagerAPI.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
+                    Gender = table.Column<string>(nullable: true),
                     Birthday = table.Column<DateTime>(nullable: false),
                     Address = table.Column<string>(nullable: true),
+                    EnrollDate = table.Column<DateTime>(nullable: false),
                     ClassID = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
@@ -434,6 +444,11 @@ namespace HighSchoolManagerAPI.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_TeacherID",
+                table: "AspNetUsers",
+                column: "TeacherID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Classes_GradeID",
                 table: "Classes",
                 column: "GradeID");
@@ -442,6 +457,13 @@ namespace HighSchoolManagerAPI.Migrations
                 name: "IX_Classes_HeadTeacherID",
                 table: "Classes",
                 column: "HeadTeacherID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Classes_Name_Year",
+                table: "Classes",
+                columns: new[] { "Name", "Year" },
+                unique: true,
+                filter: "[Name] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Conducts_SemesterID",

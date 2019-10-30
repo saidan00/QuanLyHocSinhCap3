@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HighSchoolManagerAPI.Services
 {
@@ -24,18 +26,26 @@ namespace HighSchoolManagerAPI.Services
 
         public IEnumerable<Student> GetStudents(string name, int? gradeId, int? classId, int? year, string sort)
         {
-            var students = _unitOfWork.Student.GetAll();
+            var students = _unitOfWork.Student.GetAll().Include(s => s.Class).AsQueryable();
             // filter by name
             if (!String.IsNullOrEmpty(name))
             {
+                //replace multiple spaces with single space
+                name = name.Trim();
+                name = Regex.Replace(name, @"\s+", " ");
+
+                // split into array, ex: input = "abc  xyz" -> output = ["abc", "xyz"]
                 List<string> namesArr = name.Split(' ').ToList();
+
                 var newStudents = students.Where(s => s.FirstName.Contains(namesArr[0]) || s.LastName.Contains(namesArr[0]));
+
                 for (int i = 1; i < namesArr.Count; i++)
                 {
                     string newName = namesArr[i];
                     var newStudents2 = students.Where(s => s.FirstName.Contains(newName) || s.LastName.Contains(newName));
                     newStudents = newStudents.Union(newStudents2);
                 }
+
                 students = newStudents;
             }
             // filter by gradeId

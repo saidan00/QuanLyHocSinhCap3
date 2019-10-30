@@ -9,6 +9,6 @@ namespace ApplicationCore.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public double Score { get; set; }
-        public virtual List<Violation> Violation { get; set; }
+        // public virtual List<Violation> Violation { get; set; }
     }
 }
