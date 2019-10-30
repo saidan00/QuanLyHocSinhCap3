@@ -37,7 +37,7 @@ namespace Infrastructure.Persistence
 
             // class name + year must be unique
             modelBuilder.Entity<Class>()
-                    .HasIndex(e => new { e.Name, e.Year })
+                    .HasIndex(c => new { c.Name, c.Year })
                     .IsUnique();
         }
     }

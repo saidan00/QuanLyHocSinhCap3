@@ -10,6 +10,6 @@ namespace ApplicationCore.Entities
 
         public int Coefficient { get; set; }
 
-        public virtual List<ResultDetail> ResultDetails { get; set; }
+        // public virtual List<ResultDetail> ResultDetails { get; set; }
     }
 }
