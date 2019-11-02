@@ -23,5 +23,18 @@ namespace ApplicationCore.Entities
         // public virtual List<Student> Students { get; set; }
         // public virtual List<TeachingAssignment> TeachingAssignments { get; set; }
 
+        public Class() { }
+
+        public Class(Class c)
+        {
+            this.ClassID = c.ClassID;
+            this.Name = c.Name;
+            this.Year = c.Year;
+            this.Size = c.Size;
+            this.GradeID = c.GradeID;
+            this.HeadTeacherID = c.HeadTeacherID;
+            this.Grade = c.Grade;
+            this.HeadTeacher = c.HeadTeacher;
+        }
     }
 }

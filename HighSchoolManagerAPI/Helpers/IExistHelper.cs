@@ -7,5 +7,6 @@ namespace HighSchoolManagerAPI.Helpers
         bool GradeExists(int? id);
         bool ClassExists(int id);
         bool ClassExists(string name, int year);
+        bool HeadTeacherExists(int id);
     }
 }
