@@ -42,5 +42,13 @@ namespace HighSchoolManagerAPI.Helpers
 
             return (aClass != null);
         }
+
+        // Check if Head Teacher is not belong to another class
+        public bool HeadTeacherExists(int id)
+        {
+            var aClass = _unitOfWork.Class.GetByHeadTeacher(id);
+
+            return (aClass != null);
+        }
     }
 }
