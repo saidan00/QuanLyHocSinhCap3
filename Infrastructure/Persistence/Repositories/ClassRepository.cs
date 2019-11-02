@@ -23,6 +23,15 @@ namespace Infrastructure.Persistence.Repositories
             return aClass.FirstOrDefault();
         }
 
+        public Class GetByHeadTeacher(int id)
+        {
+            var aClass =
+                HighSchoolContext.Classes
+                .Where(c => c.HeadTeacherID == id);
+
+            return aClass.FirstOrDefault();
+        }
+
         public Grade GetGrade(int gradeId)
         {
             return HighSchoolContext.Grades.Find(gradeId);
