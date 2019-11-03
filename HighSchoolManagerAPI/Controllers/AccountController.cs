@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using HighSchoolManagerAPI.FrontEndModels;
 using HighSchoolManagerAPI.Helpers;
-using HighSchoolManagerAPI.Services;
+using HighSchoolManagerAPI.Services.IServices;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using Microsoft.AspNetCore.Authorization;
 using System;
+using System.Linq;
 
 namespace HighSchoolManagerAPI.Controllers
 {
@@ -16,10 +16,12 @@ namespace HighSchoolManagerAPI.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _accountService;
+        private readonly ITeacherService _teacherService;
         private ResponseHelper resp;
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountService accountService, ITeacherService teacherService)
         {
             _accountService = accountService;
+            _teacherService = teacherService;
             resp = new ResponseHelper();
         }
 
@@ -139,11 +141,18 @@ namespace HighSchoolManagerAPI.Controllers
         public async Task<Object> CurrentUser()
         {
             var userRoles = await _accountService.GetUserRolesAsync(User.Identity.Name);
+            var user = await _accountService.GetUserAsync(User.Identity.Name);
+
+            // because using functions of Identity -> can't include teachers
+            var teacher = _teacherService.GetTeacher(user.TeacherID);
+
             var currentUser = new
             {
                 userName = User.Identity.Name,
-                roles = userRoles
+                roles = userRoles.ElementAt(0),
+                teacher = teacher
             };
+
             return currentUser;
         }
     }

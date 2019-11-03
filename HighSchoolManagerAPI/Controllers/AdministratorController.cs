@@ -2,11 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using HighSchoolManagerAPI.Helpers;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Authorization;
-using HighSchoolManagerAPI.Services;
+using HighSchoolManagerAPI.Services.IServices;
 using System.Threading.Tasks;
 using HighSchoolManagerAPI.FrontEndModels;
-using ApplicationCore.Entities;
 
 namespace HighSchoolManagerAPI.Controllers
 {

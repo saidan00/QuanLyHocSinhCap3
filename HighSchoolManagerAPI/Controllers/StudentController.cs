@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ApplicationCore.Entities;
-using HighSchoolManagerAPI.Services;
+using HighSchoolManagerAPI.Services.IServices;
 using HighSchoolManagerAPI.FrontEndModels;
 using HighSchoolManagerAPI.Helpers;
 

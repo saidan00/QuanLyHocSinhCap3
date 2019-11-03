@@ -2,8 +2,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using ApplicationCore.Entities;
 using HighSchoolManagerAPI.FrontEndModels;
-using Microsoft.AspNetCore.Authorization;
-using HighSchoolManagerAPI.Services;
+using HighSchoolManagerAPI.Services.IServices;
 
 namespace HighSchoolManagerAPI.Controllers
 {

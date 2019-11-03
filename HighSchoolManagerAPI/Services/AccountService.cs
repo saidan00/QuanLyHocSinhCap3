@@ -1,11 +1,9 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
-using HighSchoolManagerAPI.FrontEndModels;
-using HighSchoolManagerAPI.Helpers;
 using Microsoft.AspNetCore.Identity;
+using HighSchoolManagerAPI.Services.IServices;
 
 namespace HighSchoolManagerAPI.Services
 {

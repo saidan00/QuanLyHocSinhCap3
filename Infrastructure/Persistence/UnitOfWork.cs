@@ -14,7 +14,7 @@ namespace Infrastructure.Persistence
             /* Aggregates */
             Account = new AccountRepository(userManager, signInManager, roleManager);
             Class = new ClassRepository(context);
-            //Result = new ResultRepository(context);
+            Result = new ResultRepository(context);
             //Conduct = new ConductRepository(context);
 
             /* Standalone Aggregates */
@@ -22,7 +22,7 @@ namespace Infrastructure.Persistence
             //TeachingAssignment = new TeachingAssignmentRepository(context);
             Subject = new SubjectRepository(context);
             Student = new StudentRepository(context);
-            //Semester = new SemesterRepository(context);
+            Semester = new SemesterRepository(context);
 
             _context = context;
         }
@@ -30,7 +30,7 @@ namespace Infrastructure.Persistence
         /* Aggregates */
         public IAccountRepository Account { get; private set; }
         public IClassRepository Class { get; private set; }
-        //public IResultRepository Result { get; private set; }
+        public IResultRepository Result { get; private set; }
         //public IConductRepository Conduct { get; private set; }
 
         /* Standalone Aggregates */
@@ -38,7 +38,7 @@ namespace Infrastructure.Persistence
         //public ITeachingAssignmentRepository TeachingAssignment { get; private set; }
         public ISubjectRepository Subject { get; private set; }
         public IStudentRepository Student { get; private set; }
-        //public ISemesterRepository Semester { get; private set; }
+        public ISemesterRepository Semester { get; private set; }
 
         public int Complete()
         {

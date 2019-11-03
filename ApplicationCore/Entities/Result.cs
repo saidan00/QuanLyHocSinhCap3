@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ApplicationCore.Interfaces;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace ApplicationCore.Entities
 {
@@ -21,6 +22,6 @@ namespace ApplicationCore.Entities
 
         public virtual Subject Subject { get; set; }
 
-        // public virtual List<ResultDetail> ResultDetails { get; set; }
+        public virtual IEnumerable<ResultDetail> ResultDetails { get; set; }
     }
 }
