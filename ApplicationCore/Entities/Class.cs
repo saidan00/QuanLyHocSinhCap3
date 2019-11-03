@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using ApplicationCore.Interfaces;
 
 namespace ApplicationCore.Entities

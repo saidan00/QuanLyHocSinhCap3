@@ -12,7 +12,7 @@ namespace ApplicationCore.Entities
 
         public int ResultID { get; set; }
 
-        public virtual Result Result { get; set; }
+        // public virtual Result Result { get; set; }
 
         public virtual ResultType ResultType { get; set; }
     }

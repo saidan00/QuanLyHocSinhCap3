@@ -32,7 +32,7 @@ namespace HighSchoolManagerAPI.Helpers
 
         public bool ClassExists(int id)
         {
-            return (_unitOfWork.Class.GetBy((int)id) != null);
+            return (_unitOfWork.Class.GetBy(id) != null);
         }
 
         // Check for unique index (Name, Year)
@@ -49,6 +49,21 @@ namespace HighSchoolManagerAPI.Helpers
             var aClass = _unitOfWork.Class.GetByHeadTeacher(id);
 
             return (aClass != null);
+        }
+
+        public bool SemesterExists(int id)
+        {
+            return (_unitOfWork.Semester.GetBy(id) != null);
+        }
+
+        public bool SubjectExists(int id)
+        {
+            return (_unitOfWork.Subject.GetBy(id) != null);
+        }
+
+        public bool ResultTypeExists(int id)
+        {
+            return (_unitOfWork.Result.GetResultType(id) != null);
         }
     }
 }

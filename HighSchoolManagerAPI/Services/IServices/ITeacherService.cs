@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using ApplicationCore.Entities;
 
-namespace HighSchoolManagerAPI.Services
+namespace HighSchoolManagerAPI.Services.IServices
 {
     public interface ITeacherService
     {

@@ -1,11 +1,13 @@
-﻿using ApplicationCore.Entities;
+using System.Linq;
+using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories
 {
-    public class TeacherRepository : Repository<Teacher>, ITeacherRepository
+    public class SemesterRepository : Repository<Semester>, ISemesterRepository
     {
-        public TeacherRepository(HighSchoolContext context) : base(context)
+        public SemesterRepository(HighSchoolContext context) : base(context)
         {
         }
 

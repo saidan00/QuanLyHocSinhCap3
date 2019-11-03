@@ -2,6 +2,7 @@
 using System.Linq;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using HighSchoolManagerAPI.Services.IServices;
 
 namespace HighSchoolManagerAPI.Services
 {
