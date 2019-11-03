@@ -1,6 +1,6 @@
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using HighSchoolManagerAPI.Services;
+using HighSchoolManagerAPI.Services.IServices;
 
 namespace HighSchoolManagerAPI.Controllers
 {

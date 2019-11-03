@@ -11,6 +11,7 @@ using ApplicationCore.Interfaces;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
 using HighSchoolManagerAPI.Services;
+using HighSchoolManagerAPI.Services.IServices;
 using HighSchoolManagerAPI.Helpers;
 
 namespace HighSchoolManagerAPI
@@ -66,9 +67,9 @@ namespace HighSchoolManagerAPI
             services.AddControllers();
 
             /* Aggregates */
-            //services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
+            services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<IClassRepository, ClassRepository>();
-            //services.AddScoped<IResultRepository, ResultRepository>();
+            services.AddScoped<IResultRepository, ResultRepository>();
             //services.AddScoped<IConductRepository, ConductRepository>();
 
             /* Standalone Aggregates */
@@ -76,14 +77,14 @@ namespace HighSchoolManagerAPI
             //services.AddScoped<ITeachingAssignmentRepository, TeachingAssignmeRepository>();
             services.AddScoped<ISubjectRepository, SubjectRepository>();
             services.AddScoped<IStudentRepository, StudentRepository>();
-            //services.AddScoped<ISemesterRepository, SemesterRepository>();
+            services.AddScoped<ISemesterRepository, SemesterRepository>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             /* Aggregates */
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IClassService, ClassService>();
-            //services.AddScoped<IResultService, ResultService>();
+            services.AddScoped<IResultService, ResultService>();
             //services.AddScoped<IConductService, ConductService>();
 
             /* Standalone Aggregates */
@@ -91,7 +92,7 @@ namespace HighSchoolManagerAPI
             //services.AddScoped<ITeachingAssignmentService, TeachingAssignmeService>();
             services.AddScoped<ISubjectService, SubjectService>();
             services.AddScoped<IStudentService, StudentService>();
-            //services.AddScoped<ISemesterService, SemesterService>();
+            services.AddScoped<ISemesterService, SemesterService>();
 
             /* Helper(s) */
             services.AddScoped<IExistHelper, ExistHelper>();

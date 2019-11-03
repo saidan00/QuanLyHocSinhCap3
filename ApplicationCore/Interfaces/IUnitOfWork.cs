@@ -7,7 +7,7 @@ namespace ApplicationCore.Interfaces
         /* Aggregates */
         IAccountRepository Account { get; }
         IClassRepository Class { get; }
-        //IResultRepository Result { get; }
+        IResultRepository Result { get; }
         //IConductRepository Conduct { get; }
 
         /* Standalone Aggregates */
@@ -15,7 +15,7 @@ namespace ApplicationCore.Interfaces
         //ITeachingAssignmentRepository TeachingAssignment { get; }
         ISubjectRepository Subject { get; }
         IStudentRepository Student { get; }
-        //ISemesterRepository Semester { get; }
+        ISemesterRepository Semester { get; }
 
         int Complete();
     }

@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
-using HighSchoolManagerAPI.FrontEndModels;
 using Microsoft.AspNetCore.Identity;
 
-namespace HighSchoolManagerAPI.Services
+namespace HighSchoolManagerAPI.Services.IServices
 {
     public interface IAccountService
     {
