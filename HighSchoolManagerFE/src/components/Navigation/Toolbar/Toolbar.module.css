@@ -28,3 +28,17 @@
   align-items: center;
   margin-left: auto;
 }
+
+.DropdownLink {
+  display: block;
+  font-size: 16px;
+  text-align: center;
+  color: #5f6368;
+  transition: background 0.15s ease-out;
+}
+
+.DropdownLink:hover {
+  color: #1e88e5;
+  text-decoration: none;
+  background-color: #cee7ff;
+}

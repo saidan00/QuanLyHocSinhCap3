@@ -9,6 +9,9 @@ const toolbarUtil = props => {
           <i className={"fas fa-fw "+props.icon} title={props.label} ></i>
         </div>
         <div className={styles.active}></div>
+        <div className={styles.Dropdown}>
+          {props.dropdown}
+        </div>
     </div>
   );
 }
