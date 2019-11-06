@@ -16,7 +16,7 @@
 }
 
 .ToolbarUtil:hover {
-  cursor: pointer;
+  cursor: default;
 }
 
 .ToolbarUtil span {
@@ -36,4 +36,17 @@
 .ToolbarUtil:hover > .active {
   border: 2px solid #6ab7ff;
   box-shadow: 0 0 10px #6ab7ff;
+}
+
+.Dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  box-shadow: 0 4px 5px #5d5d5d45;
+}
+
+.ToolbarUtil:hover > .Dropdown {
+  display: block;
 }

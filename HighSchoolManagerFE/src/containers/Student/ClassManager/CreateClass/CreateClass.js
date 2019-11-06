@@ -1,5 +1,5 @@
 import React, {Component, Fragment} from 'react';
-import {Table, Input, InputNumber, Select, Checkbox, Popconfirm, Steps, Icon, message} from 'antd';
+import {Table, Input, InputNumber, Select, Checkbox, Popconfirm, Steps, Icon, Result, message} from 'antd';
 import styles from './CreateClass.module.css';
 
 import Request from '../../../../common/commonRequest';
@@ -341,6 +341,10 @@ class CreateClass extends Component {
       await Promise.all([this.fetchAdditionalInfos()]);
       this.setState({step1_updating: false});
     }
+    if (this.state.step === 2 && !this.props.creating)
+      this.props.changeState(true);
+    else if (this.state.step !== 2 && this.props.creating)
+      this.props.changeState(false);
   }
 
   render() {
@@ -593,10 +597,14 @@ class CreateClass extends Component {
           )}
           {/* STEP 3 (Finalizing) */}
           {this.state.step !== 3 ? null : (this.state.loading ? <LoadScreen /> :
-            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}} className={styles.WizardWrapper}>
-              <h3 style={{marginBottom: '32px'}}>Creating classes successfully</h3>
-              <Button color="primary" clicked={() => {window.location.href="/Student/ClassManager"}}>Finish</Button>
-            </div>
+            <Result
+              status="success"
+              title="Success!"
+              subTitle="Creating classes successfully"
+              extra={[
+                <Button key="finish" color="primary" clicked={this.props.finish}>Finish</Button>
+              ]}
+            />
           )}
         </div>
       </Fragment>

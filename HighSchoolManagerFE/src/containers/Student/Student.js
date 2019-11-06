@@ -4,8 +4,10 @@ import {Input, Select, Table} from 'antd';
 import moment from 'moment';
 import styles from './Student.module.css';
 
+import AuthContext from '../../context/auth-context';
 import Request from '../../common/commonRequest';
 import Params from '../../common/commonParams';
+import Auth from '../../common/commonAuth';
 import LoadScreen from '../../components/UI/LoadScreen/LoadScreen';
 import Card from '../../components/UI/Card/Card';
 import EditStudentModal from '../../components/Partial/EditStudent/EditStudent';
@@ -25,27 +27,29 @@ class Student extends Component {
       gradeID: '',
       classID: null,
     },
+    tableColumns: [
+      {title: 'Class', dataIndex: 'classLabel', width: 75},
+      {title: 'Year', dataIndex: 'classYear', width: 75},
+      {title: 'Last Name', dataIndex: 'lastName', width: 200, sorter: (a,b) => a.lastName.localeCompare(b.lastName), sortDirections: ['ascend', 'descend']},
+      {title: 'First Name', dataIndex: 'firstName', width: 150, sorter: (a,b) => a.firstName.localeCompare(b.firstName), sortDirections: ['ascend', 'descend']},
+      {title: 'Gender', dataIndex: 'gender', width: 100, sorter: (a,b) => a.gender.localeCompare(b.gender), sortDirections: ['ascend', 'descend']},
+      {title: 'DOB', dataIndex: 'birthdayFormatted', width: 200, sorter: (a, b) => a.birthday.isAfter(b.birthday), sortDirections: ['descend']},
+      {title: 'Address', dataIndex: 'address'},
+      {title: 'Actions', width: 80, fixed: 'right', render: (text, record, index) => {
+        return (
+          <div style={{display: 'flex', justifyContent: 'center'}}>
+            <Link to={`/Student/Edit/${record.key}`}><b>Edit</b></Link>
+          </div>
+        );
+      }},
+    ],
   };
-  tableColumns = [
-    {title: 'Class', dataIndex: 'classLabel', width: 75},
-    {title: 'Year', dataIndex: 'classYear', width: 75},
-    {title: 'Last Name', dataIndex: 'lastName', width: 200, sorter: (a,b) => a.lastName.localeCompare(b.lastName), sortDirections: ['ascend', 'descend']},
-    {title: 'First Name', dataIndex: 'firstName', width: 150, sorter: (a,b) => a.firstName.localeCompare(b.firstName), sortDirections: ['ascend', 'descend']},
-    {title: 'Gender', dataIndex: 'gender', width: 100, sorter: (a,b) => a.gender.localeCompare(b.gender), sortDirections: ['ascend', 'descend']},
-    {title: 'DOB', dataIndex: 'birthdayFormatted', width: 200, sorter: (a, b) => a.birthday.isAfter(b.birthday), sortDirections: ['descend']},
-    {title: 'Address', dataIndex: 'address'},
-    {title: 'Actions', width: 80, fixed: 'right', render: (text, record, index) => {
-      return (
-        <div style={{display: 'flex', justifyContent: 'center'}}>
-          <Link to={`/Student/Edit/${record.key}`}><b>Edit</b></Link>
-        </div>
-      );
-    }},
-  ]
 
   async componentDidMount() {
     await Promise.all([this.fetchStudents(), this.fetchGrades(), this.fetchClasses()]);
     this.setState({loading: false});
+    if (Auth.isInRoles(this.context.user.role, ["Manager"]) === false)
+      this.setState(prevState => {return {tableColumns: prevState.tableColumns.filter(tC => tC.title !== "Actions")}});
   }
 
   async componentDidUpdate() {
@@ -79,7 +83,9 @@ class Student extends Component {
   }
 
   async fetchStudents() {
-    const searchParams = Params.getSearchParamsFromObj(this.state.filters);
+    let searchParams = Params.getSearchParamsFromObj(this.state.filters);
+    if (parseInt(this.state.filters.gradeID) === 0)
+      searchParams = Params.getSearchParamsFromObj(this.state.filters, ['name'])+"&classID=0";
     await Request.get('/Student/Get?'+searchParams, 'cred', response => {
       let newStudents = response.data.map(_student => {
         let newStudent = {};
@@ -120,14 +126,23 @@ class Student extends Component {
     return (
       <Fragment>
         <Route path="/Student/Edit/:id" render={(props) => (
-          <EditStudentModal studentID={parseInt(props.match.params.id)} finish={this.finishEditing} />
+          <EditStudentModal studentID={parseInt(props.match.params.id)} finish={this.finishEditing} history={{...this.props.history}} />
         )} />
         {this.state.loading ? (
           <LoadScreen style={{position: 'fixed', top: '64px', left: '225px'}} />
         ) : (
           <div className={[styles.Student, styles.FadeWrapper].join(' ')}>
-            <h1>Students</h1>
-            <p>Look up and edit students information</p>
+            {Auth.isInRoles(this.context.user.role, ['Manager']) ? (
+              <Fragment>
+                <h1>Manage Students</h1>
+                <p>Look up and edit students information</p>
+              </Fragment>
+            ) : (
+              <Fragment>
+                <h1>Students</h1>
+                <p>Look up students information</p>
+              </Fragment>
+            )}
             <Card style={{height: 'calc(100vh - 232px)', flexDirection: 'column'}} >
               <div className={styles.FilterWrapper}>
                 <div>
@@ -150,6 +165,7 @@ class Student extends Component {
                     onChange={event => this.filterOnChangeHandler(event, 'gradeID')}
                   >
                     <Option value="">All</Option>
+                    <Option value="0">None</Option>
                     {this.state.grades.map(e => {
                       return (
                         <Option key={e.gradeID} value={e.gradeID}>
@@ -166,7 +182,7 @@ class Student extends Component {
                     placeholder="Select class..."
                     value={this.state.filters.classID}
                     onChange={event => this.filterOnChangeHandler(event, 'classID')}
-                    disabled={!this.state.filters.gradeID}
+                    disabled={!this.state.filters.gradeID || parseInt(this.state.filters.gradeID) === 0}
                   >
                     <Option value="">All</Option>
                     {Object.keys(this.state.classes).reverse().map(year => (
@@ -189,7 +205,7 @@ class Student extends Component {
                 }}>
                   {this.state.updating ? <LoadScreen /> :
                     <div className={styles.FadeWrapper}>
-                      <Table columns={this.tableColumns} dataSource={this.state.students} scroll={{x: 1300, y: 'calc(100vh - 417px)'}} pagination={false} bordered />
+                      <Table columns={this.state.tableColumns} dataSource={this.state.students} scroll={{x: 1300, y: 'calc(100vh - 417px)'}} pagination={false} bordered />
                     </div>
                   }
                 </div>
@@ -202,4 +218,5 @@ class Student extends Component {
   }
 }
 
+Student.contextType = AuthContext;
 export default Student;

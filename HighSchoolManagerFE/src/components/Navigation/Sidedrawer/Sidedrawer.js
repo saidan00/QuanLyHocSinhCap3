@@ -39,9 +39,20 @@ class Sidedrawer extends Component {
                       clicked={() => this.onClickHandler('Student')}
                     >
                       <SidedrawerMenuItem link="/Student/MyClass" label="My Class" />
-                      <SidedrawerMenuItem link="/Student/AddStudent" label="Add Student" />
-                      <SidedrawerMenuItem link="/Student/ClassManager" label="Class Manager" />
+                      {!Auth.isInRoles(context.user.role, ["Manager"]) ? null : (
+                        <Fragment>
+                          <SidedrawerMenuItem link="/Student/AddStudent" label="Add Student" />
+                          <SidedrawerMenuItem link="/Student/ClassManager" label="Class Manager" />
+                        </Fragment>
+                      )}
                     </SidedrawerItem>
+                    {!Auth.isInRoles(context.user.role, ["Manager"]) ? null : (
+                      <SidedrawerItem link="/Assignment" label="Assignments" icon="fa-chalkboard-teacher" exact
+                        isactive={this.state.currentPage === "Assignment"}
+                        clicked={() => this.onClickHandler('Assignment')}
+                      >
+                      </SidedrawerItem>
+                    )}
                     <SidedrawerItem link="/Result" label="Results" icon="fa-graduation-cap" exact
                       isactive={this.state.currentPage === "Result"}
                       clicked={() => this.onClickHandler('Result')}

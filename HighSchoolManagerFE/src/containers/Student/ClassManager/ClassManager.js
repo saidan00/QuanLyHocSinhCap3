@@ -30,6 +30,7 @@ class ClassManager extends Component {
     class2_movingStudents: [],
     classes: [],
     teachers: [],
+    isCreatingClass: false,
   }
 
   tableColumns = [
@@ -40,6 +41,10 @@ class ClassManager extends Component {
   ]
 
   modalClosedHandler = () => {
+    if (this.state.isCreatingClass) {
+      if (!window.confirm("Are you sure wanted to quit? Your unsaved changes will be discarded"))
+        return;
+    }
     this.props.history.push('/Student/ClassManager');
   }
 
@@ -142,9 +147,12 @@ class ClassManager extends Component {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     await Request.get('/Class/Get?year='+currentYear, 'cred', response => {
-      if (response.data.length < 2)
-        this.setState({class1_info: 0, class2_info: 0});
-      this.setState({class1_info: response.data[0], class2_info: response.data[1]});
+      if (response.data.length < 2) {
+        const emptyClass = {classID: 0};
+        this.setState({class1_info: emptyClass, class2_info: emptyClass});
+      }
+      else
+        this.setState({class1_info: response.data[0], class2_info: response.data[1]});
     });
   }
 
@@ -195,7 +203,11 @@ class ClassManager extends Component {
       <Fragment>
         <Route path="/Student/ClassManager/Create" render={() => (
           <Modal modalClosed={this.modalClosedHandler}>
-            <CreateClass />
+            <CreateClass
+              creating={this.state.isCreatingClass}
+              changeState={(state) => this.setState({isCreatingClass: state})}
+              finish={() => {this.setState({callUpdate: true, updating: true}); this.modalClosedHandler()}}
+            />
           </Modal>
         )} />
         <ClassPickerContext.Provider value={{
@@ -316,13 +328,13 @@ class ClassManager extends Component {
               <div style={{display: 'flex', flexDirection: 'column'}}>
                 <div style={{width: '65px', marginTop: '265px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
                   <Button
-                    color="normal" style={{margin: '8px'}} disabled={this.state.class2_info.classID === 0 || this.state.updating}
-                    clicked={() => this.updateStudentClassHandler(this.state.class1_movingStudents, this.state.class2_info.classID)}
-                  >{">"}</Button>
-                  <Button
                     color="normal" style={{margin: '8px'}} disabled={this.state.class1_info.classID === 0 || this.state.updating}
                     clicked={() => this.updateStudentClassHandler(this.state.class2_movingStudents, this.state.class1_info.classID)}
                   >{"<"}</Button>
+                  <Button
+                    color="normal" style={{margin: '8px'}} disabled={this.state.class2_info.classID === 0 || this.state.updating}
+                    clicked={() => this.updateStudentClassHandler(this.state.class1_movingStudents, this.state.class2_info.classID)}
+                  >{">"}</Button>
                 </div>
               </div>
               {/*RIGHT PANEL*/}
