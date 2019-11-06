@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using ApplicationCore.Entities;
 using HighSchoolManagerAPI.Helpers;
 using System.Linq;
+using System;
 
 namespace HighSchoolManagerAPI.Controllers
 {
@@ -106,6 +107,51 @@ namespace HighSchoolManagerAPI.Controllers
             }
         }
 
+        // GET: api/Result/CalculateSubjectAverage?studentId=1&subjectId=1&semesterId=1&month=1
+        [HttpGet("CalculateSubjectAverage")]
+        public ActionResult CalculateSubjectAverage(int studentId, int subjectId, int semesterId, int month)
+        {
+            var result = _resultService.GetResult(studentId, subjectId, semesterId, month);
+
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            // Check result details
+            var markColumns = 2; // số cột điểm 
+            double? avg = 0;
+            if (result.ResultDetails.Count() == markColumns)
+            {
+                double sum = 0;
+                double coefficients = 0;
+                foreach (var d in result.ResultDetails)
+                {
+                    sum += d.Mark * d.ResultType.Coefficient;
+                    coefficients += d.ResultType.Coefficient;
+                }
+                avg = sum / coefficients;
+            }
+            else
+            {
+                avg = null;
+            }
+
+            result.Average = avg;
+            _resultService.Update();
+
+            Object subjectMonthlyResult = new
+            {
+                studentId = result.StudentID,
+                subjectId = result.SubjectID,
+                semesterId = result.SemesterID,
+                resultDetails = result.ResultDetails,
+                avarage = avg
+            };
+
+            return Ok(subjectMonthlyResult);
+        }
+
         private bool IsKeyValid(UpdateMarkModel model)
         {
             // check for student
@@ -130,7 +176,7 @@ namespace HighSchoolManagerAPI.Controllers
             }
 
             // check for result type
-            if (!_exist.SemesterExists(model.SemesterID))
+            if (!_exist.ResultTypeExists(model.ResultTypeID))
             {
                 resp.code = 404; // Not found
                 resp.messages.Add("Result Type not found");
@@ -139,4 +185,5 @@ namespace HighSchoolManagerAPI.Controllers
             return true;
         }
     }
+
 }

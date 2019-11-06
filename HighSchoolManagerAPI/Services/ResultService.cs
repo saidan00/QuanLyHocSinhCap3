@@ -4,6 +4,7 @@ using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using HighSchoolManagerAPI.Services.IServices;
 using Microsoft.EntityFrameworkCore;
+using Z.EntityFramework.Plus;
 
 namespace HighSchoolManagerAPI.Services
 {
@@ -20,6 +21,20 @@ namespace HighSchoolManagerAPI.Services
             var result = _unitOfWork.Result.GetBy(resultId);
 
             return result;
+        }
+
+        public Result GetResult(int studentId, int subjectId, int semesterId, int month)
+        {
+            var result = _unitOfWork.Result.GetAll();
+            result = result.Where(r => r.StudentID == studentId);
+            result = result.Where(r => r.SubjectID == subjectId);
+            result = result.Where(r => r.SemesterID == semesterId);
+
+            result = result
+                    .IncludeFilter(r => r.ResultDetails.Where(d => d.Month == month))
+                    .IncludeFilter(r => r.ResultDetails.Select(d => d.ResultType)); // == .ThenInclude(d => d.ResultType)
+
+            return result.FirstOrDefault();
         }
 
         public IEnumerable<Result> GetResults(int? resultId, int? studentId, int? semesterId, int? subjectId, string sort)
@@ -88,6 +103,11 @@ namespace HighSchoolManagerAPI.Services
         public ResultDetail GetResultDetail(int resultId, int resultTypeId, int month)
         {
             return _unitOfWork.Result.GetResultDetail(resultId, resultTypeId, month);
+        }
+
+        public IEnumerable<ResultDetail> GetResultDetails(int resultId, int month)
+        {
+            return _unitOfWork.Result.GetResultDetails(resultId, month);
         }
 
         public void CreateDetail(ResultDetail detail)
