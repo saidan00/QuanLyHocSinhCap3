@@ -37,8 +37,8 @@ class CommonRequest {
       req.catch(error => catchFunc(error));
     return req;
   }
-  static delete(url, id, data, options, thenFunc, catchFunc) {
-    const req = axios.delete(url+'/'+id, data, this.getOpts(options))
+  static delete(url, options, thenFunc, catchFunc) {
+    const req = axios.delete(url, this.getOpts(options))
       .then(response => thenFunc(response));
     if (typeof catchFunc !== "undefined")
       req.catch(error => catchFunc(error));

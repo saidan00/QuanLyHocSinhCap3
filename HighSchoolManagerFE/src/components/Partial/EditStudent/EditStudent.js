@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Input, Radio, DatePicker, message} from 'antd';
+import {Input, Radio, DatePicker, Popconfirm, message} from 'antd';
 import moment from 'moment';
 import styles from './EditStudent.module.css';
 
@@ -98,10 +98,26 @@ class EditStudent extends Component {
       error => {
         setTimeout(reqMessage, 0);
         message.error('Added student failed');
-        console.log('POST UNSUCCESSFUL :(', error.response);
+        console.log('PUT UNSUCCESSFUL :(', error.response);
         this.setState({submittingForm: false});
       },
     );
+  }
+
+  deleteStudentHandler = () => {
+    this.setState({submittingForm: true});
+    const reqMessage = message.loading('Submitting', 9000);
+    Request.delete('/Student/Delete?studentID='+this.props.studentID, 'cred', () => {
+      setTimeout(reqMessage, 0);
+      message.success('Deleting student successfully');
+      this.setState({submittingForm: false});
+      this.props.finish();
+    }, error => {
+      setTimeout(reqMessage, 0);
+      message.error('Deleting student failed');
+      console.log('DELETE UNSUCCESSFUL :(', error.response);
+      this.setState({submittingForm: false});
+    });
   }
 
   async fetchStudent() {
@@ -116,7 +132,9 @@ class EditStudent extends Component {
       newStudent.address = _student.address;
       newStudent.classID = _student.classID;
       this.setState({editingStudent: newStudent});
-    }, error => {Request.showError(error)});
+    }, () => {
+      this.props.history.replace('/Student');
+    });
   }
 
   constructor(props) {
@@ -217,7 +235,22 @@ class EditStudent extends Component {
                 <div
                   className={styles.FieldWrapper}
                   style={{display: 'flex', justifyContent: 'center'}}>
-                  <Button color="success" clicked={this.submitFormHandler} disabled={this.state.submittingForm}>Update</Button>
+                  <Button style={{marginLeft: '143px'}} color="success" clicked={this.submitFormHandler} disabled={this.state.submittingForm}>Update</Button>
+                  <Popconfirm
+                    title="Are you sure wanted to delete this student?"
+                    okText="Yes"
+                    cancelText="No"
+                    placement="topRight"
+                    onConfirm={this.deleteStudentHandler}
+                  >
+                    <a href="./" style={{alignSelf: 'center'}}>
+                      <Button style={{marginLeft: '60px', fontSize: '10px', padding: '0.25rem'}}
+                        color="danger" clicked={() => {}} disabled={this.state.submittingForm}
+                      >
+                        Delete
+                      </Button>
+                    </a>
+                  </Popconfirm>
                 </div>
               </div>
             </div>

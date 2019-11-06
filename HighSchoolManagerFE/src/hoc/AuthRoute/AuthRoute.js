@@ -61,7 +61,8 @@ class AuthRoute extends Component {
         user: {
           username: this.state.username,
           role: this.state.role,
-        }
+        },
+        teacher: this.state.teacher,
       }}>
         <Fragment>
           {!this.state.loading ? (
