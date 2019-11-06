@@ -14,7 +14,7 @@ namespace ApplicationCore.Entities
 
         public int SubjectID { get; set; }
 
-        public double Average { get; set; }
+        public double? Average { get; set; }
 
         public virtual Semester Semester { get; set; }
 

@@ -35,6 +35,13 @@ namespace Infrastructure.Persistence.Repositories
                 .FirstOrDefault();
         }
 
+        public IQueryable<ResultDetail> GetResultDetails(int resultId, int month)
+        {
+            return HighSchoolContext.ResultDetails
+                .Where(d => d.ResultID == resultId && d.Month == month)
+                .Include(d => d.ResultType);
+        }
+
         public void AddDetail(ResultDetail detail)
         {
             HighSchoolContext.ResultDetails.Add(detail);
