@@ -47,7 +47,7 @@ namespace HighSchoolManagerAPI
             // change context to match with your database
             services.AddDbContext<HighSchoolContext>(options =>
                 options.UseSqlServer(
-                        Configuration.GetConnectionString("HoangConn"),
+                        Configuration.GetConnectionString("HuyContext"),
                         x => x.MigrationsAssembly("HighSchoolManagerAPI")
                     ));
 
