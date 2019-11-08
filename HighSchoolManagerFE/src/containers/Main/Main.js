@@ -3,10 +3,17 @@ import {Route, Switch} from 'react-router-dom';
 import AuthRoute from '../../hoc/AuthRoute/AuthRoute';
 
 import APIDemo from '../APIDemo/APIDemo';
+
 import Student from '../Student/Student';
+import MyClass from '../Student/MyClass/MyClass';
 import AddStudent from '../Student/AddStudent/AddStudent';
 import ClassManager from '../Student/ClassManager/ClassManager';
-import MyClass from '../Student/MyClass/MyClass';
+
+import Assignment from '../Assignment/Assignment';
+
+import Result from '../Result/Result';
+import ResultView from '../Result/ResultView/ResultView';
+import ResultManager from '../Result/ResultManager/ResultManager';
 
 const main = () => {
   //TODO: Add AuthRoute for Admin
@@ -30,11 +37,14 @@ const main = () => {
 
         <Route path="/Assignment" render={() => (
           <AuthRoute roles={['Manager']}>
-            <p>Teaching Assignments Page</p>
+            <Assignment />
           </AuthRoute>
         )} />
 
-        <Route path="/Result" exact render={() => <p>Result page</p>} />
+        <Route path="/Result/View" component={ResultView} />
+        <Route path="/Result/Manage" component={ResultManager} />
+        <Route path="/Result" exact component={Result} />
+
         <Route path="/Conduct" exact render={() => <p>Conduct page</p>} />
         <Route path="/Report" exact render={() => <p>Report page</p>} />
         <Route path="" render={() => <p>Not found</p>} />

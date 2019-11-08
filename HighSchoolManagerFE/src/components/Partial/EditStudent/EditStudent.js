@@ -243,13 +243,13 @@ class EditStudent extends Component {
                     placement="topRight"
                     onConfirm={this.deleteStudentHandler}
                   >
-                    <a href="./" style={{alignSelf: 'center'}}>
+                    <div style={{alignSelf: 'center'}}>
                       <Button style={{marginLeft: '60px', fontSize: '10px', padding: '0.25rem'}}
                         color="danger" clicked={() => {}} disabled={this.state.submittingForm}
                       >
                         Delete
                       </Button>
-                    </a>
+                    </div>
                   </Popconfirm>
                 </div>
               </div>

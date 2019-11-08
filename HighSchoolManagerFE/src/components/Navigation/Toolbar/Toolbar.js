@@ -16,9 +16,9 @@ const toolbar = (props) => {
           <div className={styles.Search}></div>
           <div className={styles.Utils}>
             <ToolbarUtil label="Account" icon="fa-user-circle" dropdown={(
-              <a href="./" className={styles.DropdownLink} onClick={() => {
+              <div className={styles.DropdownLink} onClick={() => {
                 Request.post('/Account/Logout', {}, 'cred', () => {
-                  window.location.href = "/";
+                  window.location.reload();
                 });
               }}>
                 <div style={{
@@ -31,7 +31,7 @@ const toolbar = (props) => {
                   <i className="fas fa-fw fa-sign-out-alt" style={{marginRight: '8px'}}></i>
                   Logout
                 </div>
-              </a>
+              </div>
             )} >
               <span>{context.teacher.name}</span>
             </ToolbarUtil>

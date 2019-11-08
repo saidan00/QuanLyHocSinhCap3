@@ -15,31 +15,22 @@ class AuthRoute extends Component {
   };
 
   async componentDidMount() {
-    console.log('1');
     await this.doAuthenticate();
-    console.log('2');
     await this.doAuthorize();
     this.setState({loading: false});
-    console.log('3');
-    //this.setState({isAuthen: true, isAuthor: true, role: ["Teacher"], loading: false});
   }
 
   async doAuthenticate() {
-    console.log('START doAuthenticate');
     await Request.get('/Account/isSignedIn', 'cred', response => {
       this.setState({isAuthen: response.data});
-      console.log('FINISHED doAuth', this.state.isAuthen);
     });
   }
   async getUserInfo() {
-    console.log('START getUserInfo');
     await Request.get('/Account/currentUser', 'cred', response => {
       this.setState({username: response.data.userName, role: response.data.roles, teacher: response.data.teacher});
-      console.log('FINISHED getUserInfo: ' + this.state.username, this.state.role);
     });
   }
   async doAuthorize() {
-    console.log('START doAuthorize with isAuthen: ', this.state.isAuthen);
     if (!this.state.isAuthen) return;
     const allowedRoles = this.props.roles;
     if (typeof allowedRoles === 'undefined') {
@@ -48,7 +39,6 @@ class AuthRoute extends Component {
     }
     await this.getUserInfo();
     const userRole = this.state.role;
-    console.log('allowedRoles: ', allowedRoles, 'currentUser role:', userRole);
     if (allowedRoles.filter(role => userRole === role).length > 0)
       this.setState({isAuthor: true});
   }

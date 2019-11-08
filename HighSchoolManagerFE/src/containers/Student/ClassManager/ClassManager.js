@@ -42,7 +42,7 @@ class ClassManager extends Component {
 
   modalClosedHandler = () => {
     if (this.state.isCreatingClass) {
-      if (!window.confirm("Are you sure wanted to quit? Your unsaved changes will be discarded"))
+      if (!window.confirm("Are you sure wanted to quit? Any unsaved changes will be discarded"))
         return;
     }
     this.props.history.push('/Student/ClassManager');
@@ -294,7 +294,7 @@ class ClassManager extends Component {
                       onBlur={() => this.updateClassHandler(1)}
                       disabled={this.state.class1_info.classID === 0}
                     >
-                      <Option value="">None</Option>
+                      <Option value={null}>None</Option>
                       {this.state.teachers.map(t => (
                         <Option key={t.teacherID} value={t.teacherID}>
                           {t.name}
@@ -369,7 +369,7 @@ class ClassManager extends Component {
                       onBlur={() => this.updateClassHandler(2)}
                       disabled={this.state.class2_info.classID === 0}
                     >
-                      <Option value="">None</Option>
+                      <Option value={null}>None</Option>
                       {this.state.teachers.map(t => (
                         <Option key={t.teacherID} value={t.teacherID}>
                           {t.name}
