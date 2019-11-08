@@ -214,7 +214,7 @@ class CreateClass extends Component {
           name: this.state.step1_grades.filter(g => g.gradeID === prevState.classModel.gradeID)[0].name +
             classNameDivider +
             (parseInt(prevState.step1_additionalInfos.existingClasses)+i+1),
-          teacherID: "",
+          teacherID: null,
           students: []});
       }
       newModel = {...newModel, classes: chosenStudentsArr};
@@ -474,7 +474,7 @@ class CreateClass extends Component {
                         })
                       }}
                     >
-                      <Option value="">None</Option>
+                      <Option value={null}>None</Option>
                       {this.state.step2_teachersList.map(t => (
                         <Option key={`teacherSelect-${t.teacherID}`} value={t.teacherID}>
                           {t.name}

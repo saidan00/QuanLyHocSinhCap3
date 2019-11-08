@@ -24,7 +24,7 @@ class Student extends Component {
     classes: [],
     filters: {
       name: '',
-      gradeID: '',
+      gradeID: null,
       classID: null,
     },
     tableColumns: [
@@ -67,7 +67,6 @@ class Student extends Component {
     });
   }
 
-  //TODO: filter by YEAR
   async fetchClasses() {
     const searchParams = Params.getSearchParamsFromObj(this.state.filters, ['gradeID']);
     await Request.get('/Class/Get?'+searchParams, 'cred', response => {
@@ -153,7 +152,6 @@ class Student extends Component {
                     value={this.state.filters.name}
                     onChange={event => this.filterOnChangeHandler(event, 'name')}
                     onKeyPress={event => {if (event.key === 'Enter') {this.setState({callUpdate: true, updating: true})}}}
-                    onBlur={() => {this.setState({callUpdate: true, updating: true})}}
                   />
                 </div>
                 <div>
@@ -164,7 +162,7 @@ class Student extends Component {
                     value={this.state.filters.gradeID}
                     onChange={event => this.filterOnChangeHandler(event, 'gradeID')}
                   >
-                    <Option value="">All</Option>
+                    <Option value={null}>All</Option>
                     <Option value="0">None</Option>
                     {this.state.grades.map(e => {
                       return (
@@ -184,7 +182,7 @@ class Student extends Component {
                     onChange={event => this.filterOnChangeHandler(event, 'classID')}
                     disabled={!this.state.filters.gradeID || parseInt(this.state.filters.gradeID) === 0}
                   >
-                    <Option value="">All</Option>
+                    <Option value={null}>All</Option>
                     {Object.keys(this.state.classes).reverse().map(year => (
                       <OptGroup key={year} value={"disabled"+year} title={year} disabled>
                         {this.state.classes[year].map(c => (

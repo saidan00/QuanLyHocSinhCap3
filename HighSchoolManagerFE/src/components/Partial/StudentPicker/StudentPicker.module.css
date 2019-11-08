@@ -11,26 +11,26 @@
   }
 }
 
-.Student .FilterInput {
+.StudentPicker .FilterInput {
   width: initial;
 }
 
-.Student .FilterSelect {
+.StudentPicker .FilterSelect {
   width: 160px;
 }
 
-.Student .FilterWrapper {
+.StudentPicker .FilterWrapper {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
 }
 
-.Student .FilterWrapper .FilterInput,
-.Student .FilterWrapper .FilterSelect,
-.Student .FilterWrapper > div > span {
+.StudentPicker .FilterWrapper .FilterInput,
+.StudentPicker .FilterWrapper .FilterSelect,
+.StudentPicker .FilterWrapper > div > span {
   margin: 0 16px 32px 0px;
 }
 
-.Student .TableWrapper {
+.StudentPicker .TableWrapper {
   height: calc(100vh - 362px);
 }

@@ -17,29 +17,33 @@ class CommonRequest {
 
   // 'options' is an string of multiple options, reflect with optionsList
   static get(url, options, thenFunc, catchFunc) {
-    const req = axios.get(url, this.getOpts(options))
-      .then(response => thenFunc(response));
+    const req = axios.get(url, this.getOpts(options));
+    if (typeof thenFunc !== "undefined")
+      req.then(response => thenFunc(response));
     if (typeof catchFunc !== "undefined")
       req.catch(error => catchFunc(error));
     return req;
   }
   static post(url, data, options, thenFunc, catchFunc) {
     const req = axios.post(url, data, this.getOpts(options))
-      .then(response => thenFunc(response));
+    if (typeof thenFunc !== "undefined")
+      req.then(response => thenFunc(response));
     if (typeof catchFunc !== "undefined")
       req.catch(error => catchFunc(error));
     return req;
   }
   static put(url, data, options, thenFunc, catchFunc) {
     const req = axios.put(url, data, this.getOpts(options))
-      .then(response => thenFunc(response));
+    if (typeof thenFunc !== "undefined")
+      req.then(response => thenFunc(response));
     if (typeof catchFunc !== "undefined")
       req.catch(error => catchFunc(error));
     return req;
   }
   static delete(url, options, thenFunc, catchFunc) {
     const req = axios.delete(url, this.getOpts(options))
-      .then(response => thenFunc(response));
+    if (typeof thenFunc !== "undefined")
+      req.then(response => thenFunc(response));
     if (typeof catchFunc !== "undefined")
       req.catch(error => catchFunc(error));
     return req;
@@ -52,6 +56,11 @@ class CommonRequest {
       });
     });
   }
+
+  static timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
 }
 
 export default CommonRequest;
