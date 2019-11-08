@@ -20,8 +20,8 @@ class ClassPicker extends Component {
     years: [],
     grades: [],
     filters: {
-      year: '',
-      gradeID: '',
+      year: null,
+      gradeID: null,
     },
     chosenClass: null,
   }
@@ -58,15 +58,14 @@ class ClassPicker extends Component {
       },
     ];
     const searchParams = Params.getSearchParamsFromObj(this.state.filters, ['year', 'gradeID']);
-    await Request.get('/Class/Get?'+searchParams, 'cred', async (response) => {
-      newClasses = [...newClasses, ...response.data];
-      for (let c of newClasses) {
-        c.key = c.classID;
-        await Request.get('/Student/Get?classid='+c.classID, 'cred', response => {
-          c.classSize = response.data.length;
-        });
-      };
-    });
+    let classesPromise = await Request.get('/Class/Get?'+searchParams, 'cred');
+    newClasses = [...newClasses, ...classesPromise.data];
+    for (let c of newClasses) {
+      c.key = c.classID;
+      await Request.get('/Student/Get?classid='+c.classID, 'cred', response => {
+        c.classSize = response.data.length;
+      });
+    };
     this.setState({classes: newClasses, updating: false});
   }
 
@@ -130,7 +129,7 @@ class ClassPicker extends Component {
                       value={this.state.filters.year}
                       onChange={e => this.filterOnChangeHandler(e, 'year')}
                     >
-                      <Option value="">All</Option>
+                      <Option value={null}>All</Option>
                       {this.state.years.map(y => (
                         <Option key={y} value={y}>{y+"-"+(y-1+2)}</Option>
                       ))}
@@ -141,7 +140,7 @@ class ClassPicker extends Component {
                       value={this.state.filters.gradeID}
                       onChange={e => this.filterOnChangeHandler(e, 'gradeID')}
                     >
-                      <Option value="">All</Option>
+                      <Option value={null}>All</Option>
                       {this.state.grades.map(g => (
                         <Option key={g.gradeID} value={g.gradeID}>{g.name}</Option>
                       ))}
@@ -158,20 +157,22 @@ class ClassPicker extends Component {
                       borderRadius: '4px'
                     }}>
                       {this.state.updating ? <LoadScreen /> :
-                        <Table
-                          dataSource={this.state.classes}
-                          columns={this.tableColumns}
-                          rowSelection={{
-                            columnWidth: 50,
-                            type: 'radio',
-                            selectedRowKeys: [this.state.chosenClass],
-                            onChange: (selectedRowKeys) => {this.setState({chosenClass: selectedRowKeys[0]})}
-                          }}
-                          scroll={{y: 'calc(100vh - 441px)'}}
-                          pagination={false}
-                          size="small"
-                          bordered
-                        />
+                        <div className={styles.WizardWrapper}>
+                          <Table
+                            dataSource={this.state.classes}
+                            columns={this.tableColumns}
+                            rowSelection={{
+                              columnWidth: 50,
+                              type: 'radio',
+                              selectedRowKeys: [this.state.chosenClass],
+                              onChange: (selectedRowKeys) => {this.setState({chosenClass: selectedRowKeys[0]})}
+                            }}
+                            scroll={{y: 'calc(100vh - 441px)'}}
+                            pagination={false}
+                            size="small"
+                            bordered
+                          />
+                        </div>
                       }
                     </div>
                   </div>

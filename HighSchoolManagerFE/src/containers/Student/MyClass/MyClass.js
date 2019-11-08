@@ -22,7 +22,25 @@ class MyClass extends Component {
     {title: 'Gender', dataIndex: 'gender', width: 100, sorter: (a,b) => a.gender.localeCompare(b.gender), sortDirections: ['ascend', 'descend']},
     {title: 'DOB', dataIndex: 'birthdayFormatted', width: 100, sorter: (a, b) => a.birthday.isAfter(b.birthday), sortDirections: ['descend']},
     {title: 'Address', dataIndex: 'address'},
-  ]
+  ];
+
+  teacherTableColumns = [
+    {
+      title: 'Subject',
+      key: 'subject',
+      render: (text, record, index) => (
+        <span>{record.subject.name}</span>
+      ),
+    },
+    {
+      title: 'Teacher',
+      key: 'teacher',
+      width: 200,
+      render: (text, record, index) => (
+        <span>{record.teacher.name}</span>
+      ),
+    },
+  ];
 
   async fetchClass() {
     await Request.get('/Class/Get?headTeacherID='+this.context.teacher.teacherID, 'cred', async(response) => {
@@ -50,8 +68,20 @@ class MyClass extends Component {
     });
   }
 
+  async fetchTeachingAssignments() {
+    let teachingAssignmentPromise = await Request.get('/TeachingAssignment/Get?classID='+this.state.classInfo.classID, 'cred');
+    let _teachingAssignments = teachingAssignmentPromise.data;
+    _teachingAssignments = _teachingAssignments.map(tA => {
+      let newTA = JSON.parse(JSON.stringify(tA));
+      newTA.key = tA.teachingAssignmentID;
+      return newTA;
+    });
+    this.setState({teachingAssignments: _teachingAssignments});
+  }
+
   async componentDidMount() {
     await this.fetchClass();
+    await this.fetchTeachingAssignments();
     this.setState({loading: false});
   }
 
@@ -77,18 +107,36 @@ class MyClass extends Component {
                     <br />
                     <p><b>Head Teacher: </b>{this.state.classInfo.headTeacher.name}</p>
                     <p><b>Number of students: </b>{this.state.students.length}</p>
+                    <div style={{
+                      height: 'calc(100vh - 501px)',
+                      border: 'thin solid #e8e8e8',
+                      borderRadius: '4px',
+                      marginRight: '16px',
+                    }}>
+                      <Table
+                        dataSource={this.state.teachingAssignments}
+                        columns={this.teacherTableColumns}
+                        scroll={{y: 'calc(100vh - 581px)'}}
+                        title={() => 'Assigned Teachers'}
+                        pagination={false}
+                        size="small"
+                        bordered
+                      />
+                    </div>
                   </div>
-                  {/* Student List & Assigned Teachers List */}
+                  {/* Student List */}
                   <div style={{width: '100%'}}>
                     <div style={{
                       height: '100%',
                       border: 'thin solid #e8e8e8',
-                      borderRadius: '4px'
+                      borderRadius: '4px',
+                      marginLeft: '32px',
                     }}>
                       <Table
                         dataSource={this.state.students}
                         columns={this.studentTableColumns}
-                        scroll={{x: 'calc(100% + 400px)', y: 'calc(100vh - 340px)'}}
+                        scroll={{x: 'calc(100% + 400px)', y: 'calc(100vh - 378px)'}}
+                        title={() => 'Students'}
                         pagination={false}
                         size="small"
                         bordered

@@ -6,7 +6,8 @@ const authContext = React.createContext({
   user: {
     username: '',
     role: '',
-  }
+  },
+  teacher: {}
 });
 
 export default authContext;
