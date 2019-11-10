@@ -31,8 +31,8 @@ namespace HighSchoolManagerAPI.Services
             result = result.Where(r => r.SemesterID == semesterId);
 
             result = result
-                    .IncludeFilter(r => r.ResultDetails.Where(d => d.Month == month))
-                    .IncludeFilter(r => r.ResultDetails.Select(d => d.ResultType)); // == .ThenInclude(d => d.ResultType)
+                    .IncludeFilter(r => r.ResultDetails.Where(d => d.Month == month).Select(d => d.ResultType));
+
 
             return result.FirstOrDefault();
         }

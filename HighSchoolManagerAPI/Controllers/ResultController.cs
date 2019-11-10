@@ -108,8 +108,8 @@ namespace HighSchoolManagerAPI.Controllers
         }
 
         // GET: api/Result/CalculateSubjectAverage?studentId=1&subjectId=1&semesterId=1&month=1
-        [HttpGet("CalculateSubjectAverage")]
-        public ActionResult CalculateSubjectAverage(int studentId, int subjectId, int semesterId, int month)
+        [HttpGet("SubjectMonthlyAverage")]
+        public ActionResult SubjectMonthlyAverage(int studentId, int subjectId, int semesterId, int month)
         {
             var result = _resultService.GetResult(studentId, subjectId, semesterId, month);
 
@@ -118,7 +118,26 @@ namespace HighSchoolManagerAPI.Controllers
                 return NotFound();
             }
 
-            // Check result details
+            var avg = CalculateSubjectMonthlyAverage(result);
+
+            // result.Average = avg;
+            // _resultService.Update();
+            // vì đây là điểm tháng -> không lưu db
+
+            Object subjectMonthlyResult = new
+            {
+                studentId = result.StudentID,
+                subjectId = result.SubjectID,
+                semesterId = result.SemesterID,
+                resultDetails = result.ResultDetails,
+                avarage = avg
+            };
+
+            return Ok(subjectMonthlyResult);
+        }
+
+        public double? CalculateSubjectMonthlyAverage(Result result)
+        {
             var markColumns = 2; // số cột điểm 
             double? avg = 0;
             if (result.ResultDetails.Count() == markColumns)
@@ -137,19 +156,7 @@ namespace HighSchoolManagerAPI.Controllers
                 avg = null;
             }
 
-            result.Average = avg;
-            _resultService.Update();
-
-            Object subjectMonthlyResult = new
-            {
-                studentId = result.StudentID,
-                subjectId = result.SubjectID,
-                semesterId = result.SemesterID,
-                resultDetails = result.ResultDetails,
-                avarage = avg
-            };
-
-            return Ok(subjectMonthlyResult);
+            return avg;
         }
 
         private bool IsKeyValid(UpdateMarkModel model)
