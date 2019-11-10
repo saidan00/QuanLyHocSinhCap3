@@ -94,7 +94,7 @@ namespace Infrastructure.Persistence
             {
                 UserName = "manager",
                 NormalizedUserName = "MANAGER",
-                TeacherID = teacher.TeacherID
+                TeacherID = teacher2.TeacherID
             };
 
             if (!context.Users.Any(u => u.UserName == user2.UserName))
@@ -113,7 +113,7 @@ namespace Infrastructure.Persistence
             {
                 UserName = "teacher",
                 NormalizedUserName = "TEACHER",
-                TeacherID = teacher.TeacherID
+                TeacherID = teacher3.TeacherID
             };
 
             if (!context.Users.Any(u => u.UserName == user3.UserName))
