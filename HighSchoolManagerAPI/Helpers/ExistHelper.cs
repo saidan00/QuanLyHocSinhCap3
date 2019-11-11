@@ -1,3 +1,4 @@
+using System.Linq;
 using ApplicationCore.Interfaces;
 
 namespace HighSchoolManagerAPI.Helpers
@@ -64,6 +65,15 @@ namespace HighSchoolManagerAPI.Helpers
         public bool ResultTypeExists(int id)
         {
             return (_unitOfWork.Result.GetResultType(id) != null);
+        }
+
+        public bool TeachingAssignmentExist(int teacherId, int classId, int subjectId)
+        {
+            var assign = _unitOfWork.TeachingAssignment.GetAll();
+            assign = assign.Where(t => t.TeacherID == teacherId)
+                        .Where(t => t.ClassID == classId)
+                        .Where(t => t.SubjectID == subjectId);
+            return (assign.FirstOrDefault() != null);
         }
     }
 }

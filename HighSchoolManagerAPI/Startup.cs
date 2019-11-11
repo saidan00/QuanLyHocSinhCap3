@@ -74,7 +74,7 @@ namespace HighSchoolManagerAPI
 
             /* Standalone Aggregates */
             services.AddScoped<ITeacherRepository, TeacherRepository>();
-            //services.AddScoped<ITeachingAssignmentRepository, TeachingAssignmeRepository>();
+            services.AddScoped<ITeachingAssignmentRepository, TeachingAssignmentRepository>();
             services.AddScoped<ISubjectRepository, SubjectRepository>();
             services.AddScoped<IStudentRepository, StudentRepository>();
             services.AddScoped<ISemesterRepository, SemesterRepository>();
@@ -89,7 +89,7 @@ namespace HighSchoolManagerAPI
 
             /* Standalone Aggregates */
             services.AddScoped<ITeacherService, TeacherService>();
-            //services.AddScoped<ITeachingAssignmentService, TeachingAssignmeService>();
+            services.AddScoped<ITeachingAssignmentService, TeachingAssignmentService>();
             services.AddScoped<ISubjectService, SubjectService>();
             services.AddScoped<IStudentService, StudentService>();
             services.AddScoped<ISemesterService, SemesterService>();
