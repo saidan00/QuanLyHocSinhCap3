@@ -11,5 +11,6 @@ namespace HighSchoolManagerAPI.Helpers
         bool SemesterExists(int id);
         bool SubjectExists(int id);
         bool ResultTypeExists(int id);
+        bool TeachingAssignmentExist(int teacherId, int classId, int subjectId);
     }
 }

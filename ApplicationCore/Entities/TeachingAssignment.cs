@@ -4,6 +4,15 @@ namespace ApplicationCore.Entities
 {
     public class TeachingAssignment : IAggregateRoot
     {
+        public TeachingAssignment() { }
+        public TeachingAssignment(TeachingAssignment assignment)
+        {
+            this.TeachingAssignmentID = assignment.TeachingAssignmentID;
+            this.TeacherID = assignment.TeacherID;
+            this.ClassID = assignment.ClassID;
+            this.SubjectID = assignment.SubjectID;
+        }
+
         public int TeachingAssignmentID { get; set; }
 
         public int TeacherID { get; set; }

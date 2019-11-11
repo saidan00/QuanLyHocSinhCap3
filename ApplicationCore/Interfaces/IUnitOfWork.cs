@@ -12,7 +12,7 @@ namespace ApplicationCore.Interfaces
 
         /* Standalone Aggregates */
         ITeacherRepository Teacher { get; }
-        //ITeachingAssignmentRepository TeachingAssignment { get; }
+        ITeachingAssignmentRepository TeachingAssignment { get; }
         ISubjectRepository Subject { get; }
         IStudentRepository Student { get; }
         ISemesterRepository Semester { get; }
