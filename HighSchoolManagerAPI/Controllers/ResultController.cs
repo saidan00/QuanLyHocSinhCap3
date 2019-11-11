@@ -115,7 +115,12 @@ namespace HighSchoolManagerAPI.Controllers
 
             if (result == null)
             {
-                return NotFound();
+                double? avg_temp = null;
+                Object subjectMonthlyResult_temp = new
+                {
+                    average = avg_temp
+                };
+                return Ok(avg_temp);
             }
 
             var avg = CalculateSubjectMonthlyAverage(result);
@@ -130,7 +135,7 @@ namespace HighSchoolManagerAPI.Controllers
                 subjectId = result.SubjectID,
                 semesterId = result.SemesterID,
                 resultDetails = result.ResultDetails,
-                avarage = avg
+                average = avg
             };
 
             return Ok(subjectMonthlyResult);
