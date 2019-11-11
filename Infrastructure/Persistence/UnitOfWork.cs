@@ -19,7 +19,7 @@ namespace Infrastructure.Persistence
 
             /* Standalone Aggregates */
             Teacher = new TeacherRepository(context);
-            //TeachingAssignment = new TeachingAssignmentRepository(context);
+            TeachingAssignment = new TeachingAssignmentRepository(context);
             Subject = new SubjectRepository(context);
             Student = new StudentRepository(context);
             Semester = new SemesterRepository(context);
@@ -35,7 +35,7 @@ namespace Infrastructure.Persistence
 
         /* Standalone Aggregates */
         public ITeacherRepository Teacher { get; private set; }
-        //public ITeachingAssignmentRepository TeachingAssignment { get; private set; }
+        public ITeachingAssignmentRepository TeachingAssignment { get; private set; }
         public ISubjectRepository Subject { get; private set; }
         public IStudentRepository Student { get; private set; }
         public ISemesterRepository Semester { get; private set; }
