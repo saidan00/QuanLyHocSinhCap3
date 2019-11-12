@@ -47,6 +47,11 @@ namespace Infrastructure.Persistence.Repositories
             HighSchoolContext.ResultDetails.Add(detail);
         }
 
+        public IQueryable<ResultType> GetAllResultTypes()
+        {
+            return HighSchoolContext.ResultTypes;
+        }
+
         protected HighSchoolContext HighSchoolContext
         {
             get { return Context as HighSchoolContext; }
