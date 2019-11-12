@@ -56,9 +56,7 @@ namespace HighSchoolManagerAPI.Controllers
                 }
                 else
                 {
-                    var result = _resultService.GetResults(null, model.StudentID, model.SemesterID, model.SubjectID, null)
-                            .AsQueryable()
-                            .FirstOrDefault();
+                    var result = _resultService.GetResult(model.StudentID, model.SubjectID, model.SemesterID, model.Month);
 
                     // Create new result if not exist
                     if (result == null)
@@ -71,24 +69,45 @@ namespace HighSchoolManagerAPI.Controllers
                         };
 
                         _resultService.CreateResult(result);
+
+                        // get again for included entities
+                        result = _resultService.GetResults(null, model.StudentID, model.SemesterID, model.SubjectID, null)
+                                .AsQueryable()
+                                .FirstOrDefault();
                     }
 
+                    // details
                     var detail = _resultService.GetResultDetail(result.ResultID, model.ResultTypeID, model.Month);
 
                     if (detail == null)
                     {
-                        detail = new ResultDetail
+                        if (result.Semester.Label.Equals("1"))
                         {
-                            ResultID = result.ResultID,
-                            ResultTypeID = model.ResultTypeID,
-                            Month = model.Month
-                        };
+                            if (!(model.Month >= 8 && model.Month <= 12))
+                            {
+                                resp.code = 400; // Bad Request
+                                resp.messages.Add(new { Month = "Month " + model.Month + " - Semester " + result.Semester.Label + " is invalid" });
+                                return BadRequest(resp);
+                            }
+                        }
+                        else
+                        {
+                            if (!(model.Month >= 1 && model.Month <= 5))
+                            {
+                                resp.code = 400; // Bad Request
+                                resp.messages.Add(new { Month = "Month " + model.Month + " - Semester " + result.Semester.Label + " is invalid" });
+                                return BadRequest(resp);
+                            }
+                        }
 
-                        _resultService.CreateDetail(detail);
+                        _resultService.CreateResultDetails(result, model.Month);
+                        detail = _resultService.GetResultDetail(result.ResultID, model.ResultTypeID, model.Month);
                     }
 
                     detail.Mark = model.Mark;
                     _resultService.Update();
+
+                    CalculateSubjectMonthlyAverage(result);
 
                     return Ok(detail);
                 }
@@ -107,7 +126,7 @@ namespace HighSchoolManagerAPI.Controllers
             }
         }
 
-        // GET: api/Result/CalculateSubjectAverage?studentId=1&subjectId=1&semesterId=1&month=1
+        // GET: api/Result/SubjectMonthlyAverage?studentId=1&subjectId=1&semesterId=1&month=1
         [HttpGet("SubjectMonthlyAverage")]
         public ActionResult SubjectMonthlyAverage(int studentId, int subjectId, int semesterId, int month)
         {
@@ -123,45 +142,79 @@ namespace HighSchoolManagerAPI.Controllers
                 return Ok(avg_temp);
             }
 
-            var avg = CalculateSubjectMonthlyAverage(result);
-
-            // result.Average = avg;
-            // _resultService.Update();
-            // vì đây là điểm tháng -> không lưu db
-
             Object subjectMonthlyResult = new
             {
                 studentId = result.StudentID,
                 subjectId = result.SubjectID,
                 semesterId = result.SemesterID,
-                resultDetails = result.ResultDetails,
-                average = avg
+                resultDetails = result.ResultDetails
             };
 
             return Ok(subjectMonthlyResult);
         }
 
+        [NonAction]
         public double? CalculateSubjectMonthlyAverage(Result result)
         {
             var markColumns = 2; // số cột điểm 
             double? avg = 0;
-            if (result.ResultDetails.Count() == markColumns)
+            if (result.ResultDetails.Count(d => d.Mark != null) == markColumns)
             {
                 double sum = 0;
                 double coefficients = 0;
+
                 foreach (var d in result.ResultDetails)
                 {
-                    sum += d.Mark * d.ResultType.Coefficient;
+                    sum += (double)d.Mark * d.ResultType.Coefficient;
                     coefficients += d.ResultType.Coefficient;
                 }
-                avg = sum / coefficients;
+
+                avg = Math.Round(sum / coefficients, 1);
             }
             else
             {
                 avg = null;
             }
 
+            // save to db base
+            foreach (var d in result.ResultDetails)
+            {
+                d.MonthlyAverage = avg;
+            }
+            _resultService.Update();
+
             return avg;
+        }
+
+        [HttpGet("SubjectMonthlyAverages")]
+        public ActionResult SubjectMonthlyAverages(int studentId, int subjectId, int year)
+        {
+            var results = _resultService.GetResults(studentId, subjectId, year);
+
+            List<object> details = new List<object>();
+
+            foreach (var r in results)
+            {
+                foreach (var d in r.ResultDetails)
+                {
+                    details.Add(new
+                    {
+                        month = d.Month,
+                        average = d.MonthlyAverage
+                    });
+                }
+            }
+
+
+            object subjectMonthlyAverages = new
+            {
+                studentId = studentId,
+                subjectId = subjectId,
+                year = year,
+                averages = details
+            };
+
+            return Ok(subjectMonthlyAverages);
         }
 
         private bool IsKeyValid(UpdateMarkModel model)

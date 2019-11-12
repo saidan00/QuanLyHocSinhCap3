@@ -4,14 +4,16 @@ using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HighSchoolManagerAPI.Migrations
 {
     [DbContext(typeof(HighSchoolContext))]
-    partial class HighSchoolContextModelSnapshot : ModelSnapshot
+    [Migration("20191112144547_ResultDetailsMonthlyAverage")]
+    partial class ResultDetailsMonthlyAverage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -201,7 +203,7 @@ namespace HighSchoolManagerAPI.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<double?>("Mark")
+                    b.Property<double>("Mark")
                         .HasColumnType("float");
 
                     b.Property<int>("Month")

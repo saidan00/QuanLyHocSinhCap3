@@ -37,6 +37,21 @@ namespace HighSchoolManagerAPI.Services
             return result.FirstOrDefault();
         }
 
+        public IEnumerable<Result> GetResults(int studentId, int subjectId, int year)
+        {
+            var results = _unitOfWork.Result.GetAll();
+            results = results.Where(r => r.StudentID == studentId);
+            results = results.Where(r => r.SubjectID == subjectId);
+            results = results.Where(r => r.Semester.Year == year);
+
+            results = results.Include(r => r.Semester);
+            results = results.IncludeFilter(r => r.ResultDetails
+                                                    .Where(d => d.ResultTypeID == 1)
+                                                    .Select(d => d.ResultType));
+
+            return results;
+        }
+
         public IEnumerable<Result> GetResults(int? resultId, int? studentId, int? semesterId, int? subjectId, string sort)
         {
             var results = _unitOfWork.Result.GetAll();
@@ -119,6 +134,43 @@ namespace HighSchoolManagerAPI.Services
         public void Update()
         {
             _unitOfWork.Complete();
+        }
+
+        public void CreateResultDetails(Result result, int month)
+        {
+            var resultTypes = this.GetAllResultTypes();
+            foreach (var t in resultTypes)
+            {
+                if (t.Coefficient != 3)
+                {
+                    var detail = new ResultDetail
+                    {
+                        ResultID = result.ResultID,
+                        ResultTypeID = t.ResultTypeID,
+                        Month = month
+                    };
+                    _unitOfWork.Result.AddDetail(detail);
+                }
+                else
+                {
+                    if (month == 12 || month == 5)
+                    {
+                        var detail = new ResultDetail
+                        {
+                            ResultID = result.ResultID,
+                            ResultTypeID = t.ResultTypeID,
+                            Month = month
+                        };
+                        _unitOfWork.Result.AddDetail(detail);
+                    }
+                }
+            }
+            _unitOfWork.Complete();
+        }
+
+        public IEnumerable<ResultType> GetAllResultTypes()
+        {
+            return _unitOfWork.Result.GetAllResultTypes();
         }
     }
 }
