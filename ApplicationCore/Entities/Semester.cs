@@ -6,7 +6,7 @@ namespace ApplicationCore.Entities
     {
         public int SemesterID { get; set; }
 
-        public string Label { get; set; }
+        public int Label { get; set; }
 
         public int Year { get; set; }
 

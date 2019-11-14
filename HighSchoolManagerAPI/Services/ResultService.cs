@@ -37,7 +37,7 @@ namespace HighSchoolManagerAPI.Services
             return result.FirstOrDefault();
         }
 
-        public IEnumerable<Result> GetResults(int studentId, int subjectId, int year)
+        public IEnumerable<Result> GetResultsWithYear(int studentId, int subjectId, int year, int? resultTypeId)
         {
             var results = _unitOfWork.Result.GetAll();
             results = results.Where(r => r.StudentID == studentId);
@@ -45,14 +45,20 @@ namespace HighSchoolManagerAPI.Services
             results = results.Where(r => r.Semester.Year == year);
 
             results = results.Include(r => r.Semester);
-            results = results.IncludeFilter(r => r.ResultDetails
-                                                    .Where(d => d.ResultTypeID == 1)
-                                                    .Select(d => d.ResultType));
+
+            if (resultTypeId != null)
+            {
+                results = results.IncludeFilter(r => r.ResultDetails.Where(d => d.ResultTypeID == resultTypeId).Select(d => d.ResultType));
+            }
+            else
+            {
+                results = results.IncludeFilter(r => r.ResultDetails.Select(d => d.ResultType));
+            }
 
             return results;
         }
 
-        public IEnumerable<Result> GetResults(int? resultId, int? studentId, int? semesterId, int? subjectId, string sort)
+        public IEnumerable<Result> GetResults(int? studentId, int? semesterId, int? subjectId, string sort)
         {
             var results = _unitOfWork.Result.GetAll();
 
