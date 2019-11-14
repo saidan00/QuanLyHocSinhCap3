@@ -6,5 +6,6 @@ namespace HighSchoolManagerAPI.Services.IServices
     public interface ISemesterService
     {
         Semester GetSemester(int semesterId);
+        IEnumerable<Semester> GetSemesters(int? label, int? year);
     }
 }
