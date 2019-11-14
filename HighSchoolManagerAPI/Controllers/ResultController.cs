@@ -6,6 +6,7 @@ using ApplicationCore.Entities;
 using HighSchoolManagerAPI.Helpers;
 using System.Linq;
 using System;
+using System.Reflection;
 
 namespace HighSchoolManagerAPI.Controllers
 {
@@ -40,7 +41,7 @@ namespace HighSchoolManagerAPI.Controllers
             }
 
             // if resultId == null
-            var results = _resultService.GetResults(resultId, studentId, semesterId, subjectId, sort);
+            var results = _resultService.GetResults(studentId, semesterId, subjectId, sort);
 
             return Ok(results);
         }
@@ -71,7 +72,7 @@ namespace HighSchoolManagerAPI.Controllers
                         _resultService.CreateResult(result);
 
                         // get again for included entities
-                        result = _resultService.GetResults(null, model.StudentID, model.SemesterID, model.SubjectID, null)
+                        result = _resultService.GetResults(model.StudentID, model.SemesterID, model.SubjectID, null)
                                 .AsQueryable()
                                 .FirstOrDefault();
                     }
@@ -79,11 +80,13 @@ namespace HighSchoolManagerAPI.Controllers
                     // details
                     var detail = _resultService.GetResultDetail(result.ResultID, model.ResultTypeID, model.Month);
 
+                    // create detail if not exist
                     if (detail == null)
                     {
-                        if (result.Semester.Label.Equals("1"))
+                        // Check for valid month - semester
+                        if (result.Semester.Label == 1)
                         {
-                            if (!(model.Month >= 8 && model.Month <= 12))
+                            if (!(model.Month >= 9 && model.Month <= 12))
                             {
                                 resp.code = 400; // Bad Request
                                 resp.messages.Add(new { Month = "Month " + model.Month + " - Semester " + result.Semester.Label + " is invalid" });
@@ -92,7 +95,7 @@ namespace HighSchoolManagerAPI.Controllers
                         }
                         else
                         {
-                            if (!(model.Month >= 1 && model.Month <= 5))
+                            if (!(model.Month >= 2 && model.Month <= 5))
                             {
                                 resp.code = 400; // Bad Request
                                 resp.messages.Add(new { Month = "Month " + model.Month + " - Semester " + result.Semester.Label + " is invalid" });
@@ -104,6 +107,7 @@ namespace HighSchoolManagerAPI.Controllers
                         detail = _resultService.GetResultDetail(result.ResultID, model.ResultTypeID, model.Month);
                     }
 
+                    // update mark
                     detail.Mark = model.Mark;
                     _resultService.Update();
 
@@ -112,7 +116,7 @@ namespace HighSchoolManagerAPI.Controllers
                     return Ok(detail);
                 }
             }
-            else
+            else // ModelState is invalid
             {
                 var errors = new List<string>();
                 foreach (var state in ModelState)
@@ -132,6 +136,7 @@ namespace HighSchoolManagerAPI.Controllers
         {
             var result = _resultService.GetResult(studentId, subjectId, semesterId, month);
 
+            // return average = null if no result found
             if (result == null)
             {
                 double? avg_temp = null;
@@ -158,15 +163,18 @@ namespace HighSchoolManagerAPI.Controllers
         {
             var markColumns = 2; // số cột điểm 
             double? avg = 0;
-            if (result.ResultDetails.Count(d => d.Mark != null) == markColumns)
+            if (result.ResultDetails.Count(d => d.Mark != null && d.ResultType.Coefficient != 3) == markColumns)
             {
                 double sum = 0;
                 double coefficients = 0;
 
                 foreach (var d in result.ResultDetails)
                 {
-                    sum += (double)d.Mark * d.ResultType.Coefficient;
-                    coefficients += d.ResultType.Coefficient;
+                    if (d.ResultType.Coefficient == 1 || d.ResultType.Coefficient == 2)
+                    {
+                        sum += (double)d.Mark * d.ResultType.Coefficient;
+                        coefficients += d.ResultType.Coefficient;
+                    }
                 }
 
                 avg = Math.Round(sum / coefficients, 1);
@@ -179,7 +187,10 @@ namespace HighSchoolManagerAPI.Controllers
             // save to db base
             foreach (var d in result.ResultDetails)
             {
-                d.MonthlyAverage = avg;
+                if (d.ResultType.Coefficient == 1 || d.ResultType.Coefficient == 2)
+                {
+                    d.MonthlyAverage = avg;
+                }
             }
             _resultService.Update();
 
@@ -189,7 +200,7 @@ namespace HighSchoolManagerAPI.Controllers
         [HttpGet("SubjectMonthlyAverages")]
         public ActionResult SubjectMonthlyAverages(int studentId, int subjectId, int year)
         {
-            var results = _resultService.GetResults(studentId, subjectId, year);
+            var results = _resultService.GetResultsWithYear(studentId, subjectId, year, 1);
 
             List<object> details = new List<object>();
 
@@ -205,7 +216,6 @@ namespace HighSchoolManagerAPI.Controllers
                 }
             }
 
-
             object subjectMonthlyAverages = new
             {
                 studentId = studentId,
@@ -215,6 +225,89 @@ namespace HighSchoolManagerAPI.Controllers
             };
 
             return Ok(subjectMonthlyAverages);
+        }
+
+        [HttpGet("SubjectSemesterAverage")]
+        public ActionResult SubjectSemesterAverage(int studentId, int subjectId, int year)
+        {
+            var results = _resultService.GetResultsWithYear(studentId, subjectId, year, null);
+            double? tmpAvg = 0; // semester avg
+            double? sum = null; // sumary of monthly avg
+            double? examMark = null;
+            double monthCount = 4; // semester = 1 (9, 10, 11, 12); semester = 2 (2, 3, 4, 5)
+            List<object> subjectSemesterAverages = new List<object>();
+
+            // semester 1, 2 averages
+            foreach (var r in results)
+            {
+                sum = null;
+                if (r.ResultDetails.Count(d => d.MonthlyAverage != null && d.ResultType.Coefficient == 1) == monthCount)
+                {
+                    sum = 0;
+                    foreach (var d in r.ResultDetails)
+                    {
+                        if (d.ResultType.Coefficient == 1)
+                        {
+                            sum += (double)d.MonthlyAverage;
+                        }
+                        else if (d.ResultType.Coefficient == 3)
+                        {
+                            examMark = d.Mark;
+                        }
+                    }
+
+                    if (examMark != null)
+                    {
+                        tmpAvg = (double)sum / monthCount;
+                        tmpAvg = (tmpAvg * 2 + examMark) / 3;
+                        tmpAvg = Math.Round((double)tmpAvg, 1);
+                    }
+                }
+                else
+                {
+                    tmpAvg = null;
+                }
+
+                // save to database
+                r.Average = tmpAvg;
+                _resultService.Update();
+
+                subjectSemesterAverages.Add(new
+                {
+                    semesterIndex = r.Semester.Label,
+                    average = tmpAvg
+                });
+            }
+
+            // year average
+            sum = 0;
+            foreach (var e in subjectSemesterAverages)
+            {
+                PropertyInfo propertyInfo = e.GetType().GetProperty("average");
+                double? currentAvg = (double?)(propertyInfo.GetValue(e));
+                if (currentAvg == null)
+                {
+                    sum = null;
+                    break;
+                }
+                sum += (double)currentAvg;
+            }
+            if (sum == null)
+            {
+                tmpAvg = null;
+            }
+            else
+            {
+                tmpAvg = sum / 2;
+                tmpAvg = Math.Round((double)tmpAvg, 1);
+            }
+            subjectSemesterAverages.Add(new
+            {
+                semesterIndex = 3,
+                average = tmpAvg
+            });
+
+            return Ok(subjectSemesterAverages);
         }
 
         private bool IsKeyValid(UpdateMarkModel model)

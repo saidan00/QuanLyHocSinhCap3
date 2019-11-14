@@ -7,8 +7,8 @@ namespace HighSchoolManagerAPI.Services.IServices
     {
         Result GetResult(int resultId);
         Result GetResult(int studentId, int subjectId, int semesterId, int month);
-        IEnumerable<Result> GetResults(int studentId, int subjectId, int year);
-        IEnumerable<Result> GetResults(int? resultId, int? studentId, int? semesterId, int? subjectId, string sort);
+        IEnumerable<Result> GetResultsWithYear(int studentId, int subjectId, int year, int? resultTypeId);
+        IEnumerable<Result> GetResults(int? studentId, int? semesterId, int? subjectId, string sort);
         void CreateResult(Result result);
         ResultDetail GetResultDetail(int resultId, int resultTypeId, int month);
         IEnumerable<ResultType> GetAllResultTypes();
