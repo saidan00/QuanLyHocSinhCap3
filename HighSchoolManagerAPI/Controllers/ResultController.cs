@@ -227,15 +227,33 @@ namespace HighSchoolManagerAPI.Controllers
             return Ok(subjectMonthlyAverages);
         }
 
-        [HttpGet("SubjectSemesterAverage")]
-        public ActionResult SubjectSemesterAverage(int studentId, int subjectId, int year)
+        [HttpGet("SubjectYearlyAverages")]
+        public ActionResult SubjectYearlyAverages(int studentId, int subjectId, int year)
         {
-            var results = _resultService.GetResultsWithYear(studentId, subjectId, year, null);
-            double? tmpAvg = 0; // semester avg
+            double? tmpAvg = null; // semester avg
             double? sum = null; // sumary of monthly avg
-            double? examMark = null;
+            double? markExam = null;
+            double? markSemester1 = null;
+            double? markSemester2 = null;
             double monthCount = 4; // semester = 1 (9, 10, 11, 12); semester = 2 (2, 3, 4, 5)
             List<object> subjectSemesterAverages = new List<object>();
+
+            var results = _resultService.GetResultsWithYear(studentId, subjectId, year, null);
+
+            // if no results found
+            if (results.Count() == 0)
+            {
+                tmpAvg = null;
+                for (int i = 1; i <= 3; i++)
+                {
+                    subjectSemesterAverages.Add(new
+                    {
+                        semesterIndex = i,
+                        average = tmpAvg
+                    });
+                }
+                return Ok(subjectSemesterAverages);
+            }
 
             // semester 1, 2 averages
             foreach (var r in results)
@@ -252,14 +270,14 @@ namespace HighSchoolManagerAPI.Controllers
                         }
                         else if (d.ResultType.Coefficient == 3)
                         {
-                            examMark = d.Mark;
+                            markExam = d.Mark;
                         }
                     }
 
-                    if (examMark != null)
+                    if (markExam != null)
                     {
                         tmpAvg = (double)sum / monthCount;
-                        tmpAvg = (tmpAvg * 2 + examMark) / 3;
+                        tmpAvg = (tmpAvg * 2 + markExam) / 3;
                         tmpAvg = Math.Round((double)tmpAvg, 1);
                     }
                 }
@@ -277,30 +295,46 @@ namespace HighSchoolManagerAPI.Controllers
                     semesterIndex = r.Semester.Label,
                     average = tmpAvg
                 });
+
+                // if have only 1 result
+                if (results.Count() == 1)
+                {
+                    if (r.Semester.Label == 1)
+                    {
+                        tmpAvg = null;
+                        subjectSemesterAverages.Add(new
+                        {
+                            semesterIndex = 2,
+                            average = tmpAvg
+                        });
+                        markSemester2 = tmpAvg;
+                    }
+                    else
+                    {
+                        tmpAvg = null;
+                        subjectSemesterAverages.Add(new
+                        {
+                            semesterIndex = 1,
+                            average = tmpAvg
+                        });
+                        markSemester1 = tmpAvg;
+                    }
+                }
+                else
+                {
+                    if (r.Semester.Label == 1)
+                    {
+                        markSemester1 = tmpAvg;
+                    }
+                    else
+                    {
+                        markSemester2 = tmpAvg;
+                    }
+                }
             }
 
             // year average
-            sum = 0;
-            foreach (var e in subjectSemesterAverages)
-            {
-                PropertyInfo propertyInfo = e.GetType().GetProperty("average");
-                double? currentAvg = (double?)(propertyInfo.GetValue(e));
-                if (currentAvg == null)
-                {
-                    sum = null;
-                    break;
-                }
-                sum += (double)currentAvg;
-            }
-            if (sum == null)
-            {
-                tmpAvg = null;
-            }
-            else
-            {
-                tmpAvg = sum / 2;
-                tmpAvg = Math.Round((double)tmpAvg, 1);
-            }
+            tmpAvg = CalculateSubjectYearSum(markSemester1, markSemester2);
             subjectSemesterAverages.Add(new
             {
                 semesterIndex = 3,
@@ -308,6 +342,23 @@ namespace HighSchoolManagerAPI.Controllers
             });
 
             return Ok(subjectSemesterAverages);
+        }
+
+        // Calculate subject result of year
+        private double? CalculateSubjectYearSum(double? markSemester1, double? markSemester2)
+        {
+            double? sum = null;
+
+            if (markSemester1 == null || markSemester2 == null)
+            {
+                sum = null;
+                return sum;
+            }
+            else
+            {
+                sum = (markSemester1 + markSemester2) / 2;
+                return Math.Round((double)sum, 1);
+            }
         }
 
         private bool IsKeyValid(UpdateMarkModel model)
