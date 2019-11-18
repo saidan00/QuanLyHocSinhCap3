@@ -41,7 +41,7 @@ class Assignment extends Component {
         render: (text, record, index) => (
           <Select
             value={record.teacher.teacherID}
-            style={{width: '100%', maxWidth: '200px'}}
+            style={{width: '100%'}}
             onChange={(event) => this.assignmentOnChangeHandler(record.teachingAssignmentID, event, record.classID, record.subjectID)}
           >
             {this.state.teachers.map(s => (
