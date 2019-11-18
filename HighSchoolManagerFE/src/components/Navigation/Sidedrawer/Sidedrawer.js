@@ -67,11 +67,11 @@ class Sidedrawer extends Component {
                       <SidedrawerMenuItem link="/Conduct/Violations" label="Violation Record" />
                       <SidedrawerMenuItem link="/Conduct/RulesManager" label="Rules Manager" />
                     </SidedrawerItem>
-                    <SidedrawerItem link="/Report" label="Report" icon="fa-chart-bar" exact
+                    <SidedrawerItem link="/Report" label="Reports" icon="fa-chart-bar" exact
                       isactive={this.state.currentPage === "Report"}
                       clicked={() => this.onClickHandler('Report')}
                     >
-                      <SidedrawerMenuItem link="/Report/Create" label="Create Report" />
+                      <SidedrawerMenuItem link="/Report/Create" label="Create" />
                     </SidedrawerItem>
                   </Fragment>
                 ) : null}
