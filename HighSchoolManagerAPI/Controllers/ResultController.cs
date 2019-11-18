@@ -262,6 +262,7 @@ namespace HighSchoolManagerAPI.Controllers
                 if (r.ResultDetails.Count(d => d.MonthlyAverage != null && d.ResultType.Coefficient == 1) == monthCount)
                 {
                     sum = 0;
+                    tmpAvg = null;
                     foreach (var d in r.ResultDetails)
                     {
                         if (d.ResultType.Coefficient == 1)
