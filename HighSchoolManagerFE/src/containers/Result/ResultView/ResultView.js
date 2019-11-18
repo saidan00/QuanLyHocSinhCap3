@@ -111,7 +111,7 @@ class ResultView extends Component {
   async getSubjectYearlyAverages(subjectID) {
     let resultYearAvgs = [];
     let subjectYearlyAveragePromise = await Request
-      .get(`/Result/SubjectSemesterAverage?studentID=${this.state.studentID}&year=${this.state.year}&subjectID=${subjectID}`, 'cred');
+      .get(`/Result/SubjectYearlyAverages?studentID=${this.state.studentID}&year=${this.state.year}&subjectID=${subjectID}`, 'cred');
     resultYearAvgs = subjectYearlyAveragePromise.data;
     return resultYearAvgs;
   }
