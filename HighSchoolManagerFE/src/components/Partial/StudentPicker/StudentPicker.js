@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router-dom';
 import {Input, Select, Table} from 'antd';
 import moment from 'moment';
 import styles from './StudentPicker.module.css';

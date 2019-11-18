@@ -37,9 +37,20 @@ class Assignment extends Component {
       {
         title: 'Teacher',
         width: 232,
-        fixed: 'left',
-        key: 'name',
-        render: (text, record, index) => <span>{record.teacher.name}</span>,
+        key: 'teacher',
+        render: (text, record, index) => (
+          <Select
+            value={record.teacher.teacherID}
+            style={{width: '100%', maxWidth: '200px'}}
+            onChange={(event) => this.assignmentOnChangeHandler(record.teachingAssignmentID, event, record.classID, record.subjectID)}
+          >
+            {this.state.teachers.map(s => (
+              <Option key={s.teacherID} value={s.teacherID}>
+                {s.name}
+              </Option>
+            ))}
+          </Select>
+        ),
         sorter: (a,b) => a.teacher.name.localeCompare(b.teacher.name),
         sortDirections: ['ascend', 'descend'],
       },
@@ -165,9 +176,12 @@ class Assignment extends Component {
         setTimeout(reqMessage, 0);
         let newTeachingAssignments = [...this.state.teachingAssignments];
         newTeachingAssignments
+          .filter(tA => tA.teachingAssignmentID === _teachingAssignmentID)[0].teacher = response.data.teacher;
+        newTeachingAssignments
           .filter(tA => tA.teachingAssignmentID === _teachingAssignmentID)[0].class = response.data.class;
         newTeachingAssignments
           .filter(tA => tA.teachingAssignmentID === _teachingAssignmentID)[0].subject = response.data.subject;
+        newTeachingAssignments.filter(tA => tA.teachingAssignmentID === _teachingAssignmentID)[0].teacherID = _teacherID;
         newTeachingAssignments.filter(tA => tA.teachingAssignmentID === _teachingAssignmentID)[0].classID = _classID;
         newTeachingAssignments.filter(tA => tA.teachingAssignmentID === _teachingAssignmentID)[0].subjectID = _subjectID;
         this.setState({teachingAssignments: newTeachingAssignments});

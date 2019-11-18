@@ -285,7 +285,7 @@ class ResultManager extends Component {
   async getSubjectYearlyAverages(studentID) {
     let resultYearAvgs = [];
     let subjectYearlyAveragePromise = await Request
-      .get(`/Result/SubjectSemesterAverage?studentID=${studentID}&year=${this.state.year}&subjectID=${this.state.subjectID}`, 'cred');
+      .get(`/Result/SubjectYearlyAverages?studentID=${studentID}&year=${this.state.year}&subjectID=${this.state.subjectID}`, 'cred');
     resultYearAvgs = subjectYearlyAveragePromise.data;
     return resultYearAvgs;
   }
