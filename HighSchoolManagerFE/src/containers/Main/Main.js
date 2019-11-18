@@ -15,6 +15,9 @@ import Result from '../Result/Result';
 import ResultView from '../Result/ResultView/ResultView';
 import ResultManager from '../Result/ResultManager/ResultManager';
 
+import Report from '../Report/Report';
+import CreateReport from '../Report/CreateReport/CreateReport';
+
 const main = () => {
   //TODO: Add AuthRoute for Admin
   return (
@@ -46,7 +49,14 @@ const main = () => {
         <Route path="/Result" exact component={Result} />
 
         <Route path="/Conduct" exact render={() => <p>Conduct page</p>} />
-        <Route path="/Report" exact render={() => <p>Report page</p>} />
+
+        <Route path="/Report/Create" render={() => (
+          <AuthRoute roles={['Manager']}>
+            <CreateReport />
+          </AuthRoute>
+        )} />
+        <Route path="/Report" exact component={Report} />
+
         <Route path="" render={() => <p>Not found</p>} />
       </Switch>
     </AuthRoute>
