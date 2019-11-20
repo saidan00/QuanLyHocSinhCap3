@@ -5,10 +5,10 @@ namespace HighSchoolManagerAPI.Services.IServices
 {
     public interface IStudentService
     {
-        public Student GetStudent(int studentId);
-        public IEnumerable<Student> GetStudents(string name, int? gradeId, int? classId, int? year, string sort);
-        public void CreateStudent(Student student);
-        public void Update();
-        public void DeleteStudent(Student student);
+        Student GetStudent(int studentId);
+        IEnumerable<Student> GetStudents(string name, int? gradeId, int? classId, int? year, string sort);
+        void CreateStudent(Student student);
+        void Update();
+        void DeleteStudent(Student student);
     }
 }

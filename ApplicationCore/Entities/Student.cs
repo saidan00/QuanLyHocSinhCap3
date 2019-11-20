@@ -29,5 +29,18 @@ namespace ApplicationCore.Entities
         {
             EnrollDate = DateTime.Today;
         }
+
+        public Student(Student student)
+        {
+            StudentID = student.StudentID;
+            FirstName = student.FirstName;
+            LastName = student.LastName;
+            Gender = student.Gender;
+            Birthday = student.Birthday;
+            Address = student.Address;
+            ClassID = student.ClassID;
+            Class = student.Class;
+            EnrollDate = DateTime.Today;
+        }
     }
 }

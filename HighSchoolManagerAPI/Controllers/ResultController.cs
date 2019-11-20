@@ -57,6 +57,7 @@ namespace HighSchoolManagerAPI.Controllers
                 }
                 else
                 {
+                    // get result filter with resultDetail.month
                     var result = _resultService.GetResult(model.StudentID, model.SubjectID, model.SemesterID, model.Month);
 
                     // Create new result if not exist
@@ -111,7 +112,7 @@ namespace HighSchoolManagerAPI.Controllers
                     detail.Mark = model.Mark;
                     _resultService.Update();
 
-                    CalculateSubjectMonthlyAverage(result);
+                    _resultService.CalculateSubjectMonthlyAverage(result);
 
                     return Ok(detail);
                 }
@@ -158,45 +159,6 @@ namespace HighSchoolManagerAPI.Controllers
             return Ok(subjectMonthlyResult);
         }
 
-        [NonAction]
-        public double? CalculateSubjectMonthlyAverage(Result result)
-        {
-            var markColumns = 2; // số cột điểm 
-            double? avg = 0;
-            if (result.ResultDetails.Count(d => d.Mark != null && d.ResultType.Coefficient != 3) == markColumns)
-            {
-                double sum = 0;
-                double coefficients = 0;
-
-                foreach (var d in result.ResultDetails)
-                {
-                    if (d.ResultType.Coefficient == 1 || d.ResultType.Coefficient == 2)
-                    {
-                        sum += (double)d.Mark * d.ResultType.Coefficient;
-                        coefficients += d.ResultType.Coefficient;
-                    }
-                }
-
-                avg = Math.Round(sum / coefficients, 1);
-            }
-            else
-            {
-                avg = null;
-            }
-
-            // save to db base
-            foreach (var d in result.ResultDetails)
-            {
-                if (d.ResultType.Coefficient == 1 || d.ResultType.Coefficient == 2)
-                {
-                    d.MonthlyAverage = avg;
-                }
-            }
-            _resultService.Update();
-
-            return avg;
-        }
-
         [HttpGet("SubjectMonthlyAverages")]
         public ActionResult SubjectMonthlyAverages(int studentId, int subjectId, int year)
         {
@@ -231,8 +193,6 @@ namespace HighSchoolManagerAPI.Controllers
         public ActionResult SubjectYearlyAverages(int studentId, int subjectId, int year)
         {
             double? tmpAvg = null; // semester avg
-            double? sum = null; // sumary of monthly avg
-            double? markExam = null;
             double? markSemester1 = null;
             double? markSemester2 = null;
             double monthCount = 4; // semester = 1 (9, 10, 11, 12); semester = 2 (2, 3, 4, 5)
@@ -258,29 +218,9 @@ namespace HighSchoolManagerAPI.Controllers
             // semester 1, 2 averages
             foreach (var r in results)
             {
-                sum = null;
                 if (r.ResultDetails.Count(d => d.MonthlyAverage != null && d.ResultType.Coefficient == 1) == monthCount)
                 {
-                    sum = 0;
-                    tmpAvg = null;
-                    foreach (var d in r.ResultDetails)
-                    {
-                        if (d.ResultType.Coefficient == 1)
-                        {
-                            sum += (double)d.MonthlyAverage;
-                        }
-                        else if (d.ResultType.Coefficient == 3)
-                        {
-                            markExam = d.Mark;
-                        }
-                    }
-
-                    if (markExam != null)
-                    {
-                        tmpAvg = (double)sum / monthCount;
-                        tmpAvg = (tmpAvg * 2 + markExam) / 3;
-                        tmpAvg = Math.Round((double)tmpAvg, 1);
-                    }
+                    tmpAvg = _resultService.CalculateSubjectSemesterSum(r.ResultDetails);
                 }
                 else
                 {
@@ -335,7 +275,7 @@ namespace HighSchoolManagerAPI.Controllers
             }
 
             // year average
-            tmpAvg = CalculateSubjectYearSum(markSemester1, markSemester2);
+            tmpAvg = _resultService.CalculateSubjectYearSum(markSemester1, markSemester2);
             subjectSemesterAverages.Add(new
             {
                 semesterIndex = 3,
@@ -343,23 +283,6 @@ namespace HighSchoolManagerAPI.Controllers
             });
 
             return Ok(subjectSemesterAverages);
-        }
-
-        // Calculate subject result of year
-        private double? CalculateSubjectYearSum(double? markSemester1, double? markSemester2)
-        {
-            double? sum = null;
-
-            if (markSemester1 == null || markSemester2 == null)
-            {
-                sum = null;
-                return sum;
-            }
-            else
-            {
-                sum = (markSemester1 + markSemester2) / 2;
-                return Math.Round((double)sum, 1);
-            }
         }
 
         private bool IsKeyValid(UpdateMarkModel model)
