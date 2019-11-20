@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ApplicationCore.Entities;
+using HighSchoolManagerAPI.FrontEndModels;
 
 namespace HighSchoolManagerAPI.Services.IServices
 {
@@ -16,6 +17,10 @@ namespace HighSchoolManagerAPI.Services.IServices
         IEnumerable<ResultDetail> GetResultDetails(int resultId, int month);
         void CreateDetail(ResultDetail detail);
         void CreateResultDetails(Result result, int month);
+        double? CalculateSubjectMonthlyAverage(Result result);
+        double? CalculateSubjectSemesterSum(IEnumerable<ResultDetail> details);
+        double? CalculateSubjectYearSum(double? markSemester1, double? markSemester2);
+        double? CalculateStudentMonthlyAverage(List<ResultAverage> resultAverages);
         void Update();
     }
 }

@@ -85,6 +85,7 @@ namespace HighSchoolManagerAPI
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IClassService, ClassService>();
             services.AddScoped<IResultService, ResultService>();
+            services.AddScoped<IReportService, ReportService>();
             //services.AddScoped<IConductService, ConductService>();
 
             /* Standalone Aggregates */
