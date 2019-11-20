@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using HighSchoolManagerAPI.FrontEndModels;
 using HighSchoolManagerAPI.Services.IServices;
 using Microsoft.EntityFrameworkCore;
 using Z.EntityFramework.Plus;
@@ -177,6 +179,116 @@ namespace HighSchoolManagerAPI.Services
         public IEnumerable<ResultType> GetAllResultTypes()
         {
             return _unitOfWork.Result.GetAllResultTypes();
+        }
+
+        // result filtered with resultDetail.month
+        public double? CalculateSubjectMonthlyAverage(Result result)
+        {
+            var markColumns = 2; // số cột điểm 
+            double? avg = 0;
+            if (result.ResultDetails.Count(d => d.Mark != null && d.ResultType.Coefficient != 3) == markColumns)
+            {
+                double sum = 0;
+                double coefficients = 0;
+
+                foreach (var d in result.ResultDetails)
+                {
+                    if (d.ResultType.Coefficient == 1 || d.ResultType.Coefficient == 2)
+                    {
+                        sum += (double)d.Mark * d.ResultType.Coefficient;
+                        coefficients += d.ResultType.Coefficient;
+                    }
+                }
+
+                avg = Math.Round(sum / coefficients, 1);
+            }
+            else
+            {
+                avg = null;
+            }
+
+            // save to db base
+            foreach (var d in result.ResultDetails)
+            {
+                if (d.ResultType.Coefficient == 1 || d.ResultType.Coefficient == 2)
+                {
+                    d.MonthlyAverage = avg;
+                }
+            }
+
+            _unitOfWork.Complete();
+
+            return avg;
+        }
+
+        // Calculate suubject result of semester
+        public double? CalculateSubjectSemesterSum(IEnumerable<ResultDetail> details)
+        {
+            double? sum = 0;
+            double? tmpAvg = null;
+            double? markExam = null;
+            double monthCount = 4; // semester = 1 (9, 10, 11, 12); semester = 2 (2, 3, 4, 5)
+
+            foreach (var d in details)
+            {
+                if (d.ResultType.Coefficient == 1)
+                {
+                    sum += (double)d.MonthlyAverage;
+                }
+                else if (d.ResultType.Coefficient == 3)
+                {
+                    markExam = d.Mark;
+                }
+            }
+
+            if (markExam != null)
+            {
+                tmpAvg = (double)sum / monthCount;
+                tmpAvg = (tmpAvg * 2 + markExam) / 3;
+                tmpAvg = Math.Round((double)tmpAvg, 1);
+            }
+
+            return tmpAvg;
+        }
+
+        // Calculate subject result of year
+        public double? CalculateSubjectYearSum(double? markSemester1, double? markSemester2)
+        {
+            double? sum = null;
+
+            if (markSemester1 == null || markSemester2 == null)
+            {
+                sum = null;
+                return sum;
+            }
+            else
+            {
+                sum = (markSemester1 + markSemester2) / 2;
+                return Math.Round((double)sum, 1);
+            }
+        }
+
+        // input: list of subject avg (by student, month)
+        public double? CalculateStudentMonthlyAverage(List<ResultAverage> resultAverages)
+        {
+            // if there is any null average
+            if (resultAverages.Count(r => r.average == null) > 0)
+            {
+                return null;
+            }
+
+            double sum = 0;
+            double numOfSubject = resultAverages.Count();
+            double average = 0;
+
+            foreach (var r in resultAverages)
+            {
+                sum += (double)r.average;
+            }
+
+            average = Math.Round(sum / numOfSubject, 1);
+
+            return average;
         }
     }
 }
