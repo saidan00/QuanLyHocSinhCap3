@@ -7,5 +7,6 @@ namespace HighSchoolManagerAPI.Services.IServices
     {
         List<ReportModel> StudentsRanking(List<ReportModel> reports);
         List<ReportModel> EvaluatePerformance(List<ReportModel> reports);
+        PerformanceReportModel PercentagePerformance(PerformanceReportModel performanceReport, List<ReportModel> reports, string performance);
     }
 }
