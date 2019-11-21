@@ -20,7 +20,7 @@ namespace HighSchoolManagerAPI.Services.IServices
         double? CalculateSubjectMonthlyAverage(Result result);
         double? CalculateSubjectSemesterSum(IEnumerable<ResultDetail> details);
         double? CalculateSubjectYearSum(double? markSemester1, double? markSemester2);
-        double? CalculateStudentMonthlyAverage(List<ResultAverage> resultAverages);
+        double? CalculateStudentAverage(List<ResultAverage> resultAverages, int numOfSubject);
         void Update();
     }
 }
