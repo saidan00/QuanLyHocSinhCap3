@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using HighSchoolManagerAPI.FrontEndModels;
 using HighSchoolManagerAPI.Services.IServices;
@@ -17,7 +19,7 @@ namespace HighSchoolManagerAPI.Services
         {
             int rank = 1;
             ReportModel preReport = new ReportModel();
-            int size = reports.Count();
+            int size = reports.Count;
             for (int i = 0; i < size; i++)
             {
                 if (i == 0)
@@ -81,6 +83,44 @@ namespace HighSchoolManagerAPI.Services
             }
 
             return reports;
+        }
+
+        public PerformanceReportModel PercentagePerformance(PerformanceReportModel performanceReport, List<ReportModel> reports, string performance)
+        {
+            Percentage percentage = new Percentage();
+            double classSize = reports.Count;
+
+            if (classSize == 0)
+            {
+                percentage.performance = performance;
+                percentage.percent = 0;
+
+                performanceReport.classSize = (int)classSize;
+                performanceReport.percentages.Add(percentage);
+
+                return performanceReport;
+            }
+
+            double performanceCount = 0;
+
+            foreach (var r in reports)
+            {
+                if (!string.IsNullOrEmpty(r.performance))
+                {
+                    if (r.performance.Equals(performance))
+                    {
+                        performanceCount++;
+                    }
+                }
+            }
+
+            percentage.performance = performance;
+            percentage.percent = Math.Round(performanceCount / classSize, 2);
+
+            performanceReport.classSize = (int)classSize;
+            performanceReport.percentages.Add(percentage);
+
+            return performanceReport;
         }
     }
 }
