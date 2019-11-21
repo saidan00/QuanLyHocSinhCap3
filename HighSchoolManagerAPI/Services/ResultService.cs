@@ -269,7 +269,7 @@ namespace HighSchoolManagerAPI.Services
         }
 
         // input: list of subject avg (by student, month)
-        public double? CalculateStudentMonthlyAverage(List<ResultAverage> resultAverages)
+        public double? CalculateStudentAverage(List<ResultAverage> resultAverages, int numOfSubject)
         {
             // if there is any null average
             if (resultAverages.Count(r => r.average == null) > 0)
@@ -278,7 +278,6 @@ namespace HighSchoolManagerAPI.Services
             }
 
             double sum = 0;
-            double numOfSubject = resultAverages.Count();
             double average = 0;
 
             foreach (var r in resultAverages)

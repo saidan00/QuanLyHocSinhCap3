@@ -38,7 +38,9 @@ namespace HighSchoolManagerAPI.Controllers
             if (classId != null || gradeId != null)
             {
                 var subjects = _subjectService.GetSubjects(null, null);
+                int numOfSubject = subjects.Count();
                 List<Student> students;
+
                 if (classId != null)
                 {
                     // get students by classid
@@ -48,6 +50,12 @@ namespace HighSchoolManagerAPI.Controllers
                 {
                     // get students by gradeid
                     students = _studentService.GetStudents(null, gradeId, null, null, null).ToList();
+                }
+
+                // if no student found
+                if (students.Count() == 0)
+                {
+                    return Ok(monthlyReports);
                 }
 
                 Semester semester = new Semester();
@@ -93,7 +101,8 @@ namespace HighSchoolManagerAPI.Controllers
                         }
                         else
                         {
-                            average = _resultService.CalculateSubjectMonthlyAverage(result);
+                            // get monthly average
+                            average = result.ResultDetails.ToList()[0].MonthlyAverage;
                         }
 
                         ResultAverage resultAverage = new ResultAverage()
@@ -105,7 +114,7 @@ namespace HighSchoolManagerAPI.Controllers
                         monthlyReport.resultAvgs.Add(resultAverage);
                     }
 
-                    monthlyReport.sumAverage = _resultService.CalculateStudentMonthlyAverage(monthlyReport.resultAvgs);
+                    monthlyReport.sumAverage = _resultService.CalculateStudentAverage(monthlyReport.resultAvgs, numOfSubject);
 
                     monthlyReports.Add(monthlyReport);
                 }
@@ -123,6 +132,91 @@ namespace HighSchoolManagerAPI.Controllers
             }
 
             return Ok(monthlyReports);
+        }
+
+        [HttpGet("SemesterReport")]
+        public ActionResult SemesterReport(int? classId, int? gradeId, int semesterId)
+        {
+            // object to return
+            List<ReportModel> semesterReports = new List<ReportModel>();
+
+            if (classId != null || gradeId != null)
+            {
+                var subjects = _subjectService.GetSubjects(null, null);
+                int numOfSubject = subjects.Count();
+                List<Student> students;
+
+                if (classId != null)
+                {
+                    // get students by classid
+                    students = _studentService.GetStudents(null, null, classId, null, null).ToList();
+                }
+                else
+                {
+                    // get students by gradeid
+                    students = _studentService.GetStudents(null, gradeId, null, null, null).ToList();
+                }
+
+                // if no student found
+                if (students.Count() == 0)
+                {
+                    return Ok(semesterReports);
+                }
+
+                Result result = new Result();
+
+                // calculate average for each student
+                foreach (var student in students)
+                {
+                    ReportModel semesterReport = new ReportModel();
+                    semesterReport.resultAvgs = new List<ResultAverage>();
+
+                    semesterReport.student = new Student(student);
+                    double? average = null;
+
+                    // calculate each subject average
+                    foreach (var subject in subjects)
+                    {
+                        // get result, filter detail by month
+                        result = _resultService.GetResults(student.StudentID, semesterId, subject.SubjectID, null).FirstOrDefault();
+
+                        if (result == null)
+                        {
+                            average = null;
+                        }
+                        else
+                        {
+                            // get monthly average
+                            average = result.Average;
+                        }
+
+                        ResultAverage resultAverage = new ResultAverage()
+                        {
+                            subject = new Subject(subject),
+                            average = average
+                        };
+
+                        semesterReport.resultAvgs.Add(resultAverage);
+                    }
+
+                    semesterReport.sumAverage = _resultService.CalculateStudentAverage(semesterReport.resultAvgs, numOfSubject);
+
+                    semesterReports.Add(semesterReport);
+                }
+
+                // sort by sumAverage
+                semesterReports = semesterReports.OrderByDescending(m => m.sumAverage).ToList();
+
+                // ranking
+                semesterReports = _reportService.StudentsRanking(semesterReports);
+
+                // performance
+                semesterReports = _reportService.EvaluatePerformance(semesterReports);
+
+                return Ok(semesterReports);
+            }
+
+            return Ok(semesterReports);
         }
     }
 }
