@@ -42,7 +42,11 @@ class AddStudent extends Component {
     birthday: {
       event: {},
       label: 'Date of Birth',
-      validates: [{name: 'NotNull', params: []}],
+      validates: [
+        {name: 'NotNull', params: []},
+        {name: 'FromYearsOld', params: [14]},
+        {name: 'ToYearsOld', params: [18]},
+      ],
       errorMessage: '',
     },
     address: {

@@ -2,8 +2,8 @@ import React, {Component, Fragment} from 'react';
 import {Input, Select, Table, Popconfirm, message} from 'antd';
 import styles from './Assignment.module.css';
 
+import Fetch from '../../common/commonFetch';
 import Request from '../../common/commonRequest';
-import Params from '../../common/commonParams';
 import LoadScreen from '../../components/UI/LoadScreen/LoadScreen';
 import Card from '../../components/UI/Card/Card';
 import Button from '../../components/UI/Button/Button';
@@ -16,6 +16,7 @@ class Assignment extends Component {
     callUpdate: false,
     updating: false,
     callUpdateTeacher: false,
+    callAddAssignment: false,
     filters: {
       name: '',
       classID: null,
@@ -136,9 +137,11 @@ class Assignment extends Component {
   newAssignmentHandler = () => {
     const _assignment = {...this.state.addingAssignment};
     const reqMessage = message.loading('Submitting', 9000);
+    this.setState({callAddAssignment: true});
     Request.post('/TeachingAssignment/Create', _assignment, 'cred',
       () => {
         this.setState({addingAssignment: {teacherID: null, classID: null, subjectID: null}});
+        this.setState({callAddAssignment: false});
         this.setState({callUpdate: true, updating: true});
         setTimeout(reqMessage, 0);
       },
@@ -193,52 +196,9 @@ class Assignment extends Component {
     )
   }
 
-  async fetchTeachers() {
-    // Full teacher list
-    let teachersPromise = await Request.get('/Teacher/Get', 'cred');
-    // Teacher filtered by name
-    let _teachers = teachersPromise.data;
-    const searchParams = Params.getSearchParamsFromObj(this.state.filters, ['name']);
-    let filteredTeachersPromise = await Request.get('/Teacher/Get?'+searchParams, 'cred');
-    let _filteredTeachers = filteredTeachersPromise.data.map(t => t.teacherID);
-
-    this.setState({teachers: _teachers, filteredTeachers: _filteredTeachers});
-  }
-
-  async fetchSubjects() {
-    let subjectsPromise = await Request.get('/Subject/Get', 'cred');
-    let _subjects = subjectsPromise.data;
-    this.setState({subjects: _subjects});
-  }
-
-  async fetchClasses() {
-    let _classesPromise = await Request.get('/Class/Get', 'cred');
-    let _classes = _classesPromise.data;
-    let _formattedClasses = _classesPromise.data.reduce((classesArr, cls) => {
-      if (!classesArr[cls.year]) {
-        classesArr[cls.year] = [];
-      }
-      classesArr[cls.year].push(cls);
-      return classesArr;
-    }, {});
-    this.setState({classes: _classes, formattedClasses: _formattedClasses});
-  }
-
-  async fetchTeachingAssignments() {
-    const searchParams = Params.getSearchParamsFromObj(this.state.filters, ['classID', 'subjectID']);
-    let teachingAssignmentPromise = await Request.get('/TeachingAssignment/Get?'+searchParams, 'cred');
-    let _teachingAssignments = teachingAssignmentPromise.data.filter(tA => this.state.filteredTeachers.includes(tA.teacherID));
-    _teachingAssignments = _teachingAssignments.map(tA => {
-      let newTA = JSON.parse(JSON.stringify(tA));
-      newTA.key = tA.teachingAssignmentID;
-      return newTA;
-    });
-    this.setState({teachingAssignments: _teachingAssignments});
-  }
-
   async componentDidMount() {
-    await Promise.all([this.fetchTeachers(), this.fetchClasses(), this.fetchSubjects()]);
-    await this.fetchTeachingAssignments();
+    await Promise.all([Fetch.fetchTeachers(this, ['name']), Fetch.fetchClasses(this), Fetch.fetchSubjects(this)]);
+    await Fetch.fetchTeachingAssignments(this, ['classID', 'subjectID']);
     this.setState({loading: false});
   }
 
@@ -246,8 +206,8 @@ class Assignment extends Component {
     if (this.state.callUpdate) {
       this.setState({callUpdate: false});
       if (this.state.callUpdateTeacher)
-        await this.fetchTeachers();
-      await this.fetchTeachingAssignments();
+        await Fetch.fetchTeachers(this, ['name']);
+      await Fetch.fetchTeachingAssignments(this, ['classID', 'subjectID']);
       this.setState({updating: false});
     }
   }
@@ -414,7 +374,13 @@ class Assignment extends Component {
                               width: 100,
                               fixed: 'right',
                               render: (text, record, index) => (
-                                <Button color="primary" clicked={this.newAssignmentHandler}>Add</Button>
+                                <Button
+                                  color="primary"
+                                  clicked={this.newAssignmentHandler}
+                                  disabled={this.state.callAddAssignment}
+                                >
+                                  Add
+                                </Button>
                               )
                             },
                           ]}

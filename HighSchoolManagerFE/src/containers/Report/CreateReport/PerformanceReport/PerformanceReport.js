@@ -7,7 +7,7 @@ import Fetch from '../../../../common/commonFetch';
 import LoadScreen from '../../../../components/UI/LoadScreen/LoadScreen';
 import Button from '../../../../components/UI/Button/Button';
 
-const {Option, OptGroup} = Select;
+const {Option} = Select;
 
 class PerformanceReport extends Component {
   state = {

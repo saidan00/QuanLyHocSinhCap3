@@ -65,7 +65,7 @@ namespace HighSchoolManagerAPI.Controllers
 
         // we not use 'register' here
         [HttpPost("Create")]
-        [Authorize(Roles = "Manager")]
+        [Authorize(Roles = "Manager, Admin")]
         public async Task<ActionResult> CreateUserAsync(RegisterModel model)
         {
             if (ModelState.IsValid)

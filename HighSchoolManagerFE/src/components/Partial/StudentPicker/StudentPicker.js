@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import {Input, Select, Table} from 'antd';
-import moment from 'moment';
 import styles from './StudentPicker.module.css';
 
+import Fetch from '../../../common/commonFetch';
 import Request from '../../../common/commonRequest';
 import Params from '../../../common/commonParams';
 import StudentPickerContext from '../../../context/studentpicker-context';
@@ -39,29 +39,6 @@ class StudentPicker extends Component {
     {title: 'Address', dataIndex: 'address'},
   ];
 
-  async fetchStudents() {
-    let searchParams = Params.getSearchParamsFromObj(this.state.filters);
-    if (parseInt(this.state.filters.gradeID) === 0)
-      searchParams = Params.getSearchParamsFromObj(this.state.filters, ['name'])+"&classID=0";
-    await Request.get('/Student/Get?'+searchParams, 'cred', response => {
-      let newStudents = response.data.map(_student => {
-        let newStudent = {};
-        newStudent.key = _student.studentID;
-        newStudent.classLabel = (_student.class) ? _student.class.name : <i>None</i>;
-        newStudent.classYear = (_student.class) ? _student.class.year : <i>None</i>;
-        newStudent.lastName = _student.lastName;
-        newStudent.firstName = _student.firstName;
-        newStudent.gender = _student.gender;
-        newStudent.birthday = moment(_student.birthday, 'YYYY/MM/DD');
-        newStudent.birthdayFormatted = newStudent.birthday.format('DD/MM/YYYY');
-        newStudent.address = _student.address;
-        newStudent.class = _student.class;
-        return newStudent;
-      });
-      this.setState({students: newStudents});
-    });
-  }
-
   async fetchClasses() {
     const searchParams = Params.getSearchParamsFromObj(this.state.filters, ['gradeID']);
     await Request.get('/Class/Get?'+searchParams, 'cred', response => {
@@ -87,12 +64,6 @@ class StudentPicker extends Component {
     });
   }
 
-  async fetchGrades() {
-    await Request.get('/Grade/Get', 'cred', response => {
-      this.setState({grades: response.data});
-    });
-  }
-
   filterOnChangeHandler = (event, key) => {
     const value = event ? (event.target ? event.target.value : event) : null;
     this.setState(prevState => {
@@ -109,15 +80,15 @@ class StudentPicker extends Component {
 
   async componentDidMount() {
     this.setState({chosenStudent: this.props.defaultStudent});
-    await Promise.all([this.fetchYears(), this.fetchGrades()]);
-    await this.fetchStudents();
+    await Promise.all([this.fetchYears(), Fetch.fetchGrades(this)]);
+    await Fetch.fetchStudents(this);
     this.setState({loading: false});
   }
 
   async componentDidUpdate() {
     if (this.state.callUpdate) {
       this.setState({callUpdate: false});
-      await Promise.all([this.fetchStudents(), this.fetchClasses()]);
+      await Promise.all([Fetch.fetchStudents(this), this.fetchClasses()]);
       this.setState({updating: false});
     }
   }

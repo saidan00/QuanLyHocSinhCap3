@@ -1,5 +1,5 @@
-import React, {Component, Fragment} from 'react';
-import {Input, Select} from 'antd';
+import React, {Component} from 'react';
+import {Select} from 'antd';
 import styles from './CreateReport.module.css';
 
 import MonthlyReport from './MonthlyReport/MonthlyReport';

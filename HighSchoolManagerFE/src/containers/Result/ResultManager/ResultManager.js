@@ -3,6 +3,7 @@ import {Table, Input, Select, message} from 'antd';
 import styles from './ResultManager.module.css';
 
 import AuthContext from '../../../context/auth-context';
+import Fetch from '../../../common/commonFetch';
 import Request from '../../../common/commonRequest'
 import Card from '../../../components/UI/Card/Card';
 import LoadScreen from '../../../components/UI/LoadScreen/LoadScreen';
@@ -233,7 +234,7 @@ class ResultManager extends Component {
     this.setState({tableColumns: markColumns});
   }
 
-  async fetchTeachingAssignment() {
+  async fetchAssignedClasses() {
     let teachingAssignmentPromise = await Request.get(`/TeachingAssignment/Get?teacherID=${this.context.teacher.teacherID}`, 'cred');
     let _classIDArr = teachingAssignmentPromise.data.map(tA => tA.classID);
     this.setState({
@@ -321,13 +322,6 @@ class ResultManager extends Component {
     this.setState({students: newStudents});
   }
 
-  async fetchSemesters() {
-    let _semesters = [];
-    let semestersPromise = await Request.get('/Semester/Get', 'cred');
-    _semesters = semestersPromise.data;
-    this.setState({semesters: _semesters});
-  }
-
   markInputEventsInitialize() {
     let markInputEvents = [];
     for (let i=0; i < this.state.students.length; i++) {
@@ -342,8 +336,8 @@ class ResultManager extends Component {
   }
 
   async componentDidMount() {
-    await this.fetchTeachingAssignment();
-    await Promise.all([this.fetchClasses(), this.fetchSubjects(), this.fetchSemesters()]);
+    await this.fetchAssignedClasses();
+    await Promise.all([this.fetchClasses(), this.fetchSubjects(), Fetch.fetchSemesters(this)]);
     await this.fetchStudentsResults();
     this.markInputEventsInitialize();
     this.setupMarkColumns();
@@ -354,7 +348,7 @@ class ResultManager extends Component {
   async componentDidUpdate() {
     if (this.state.callUpdate) {
       this.setState({callUpdate: false});
-      await this.fetchTeachingAssignment();
+      await this.fetchAssignedClasses();
       if (this.state.callChangeClass) {
         this.setState({subjectID: null, year: this.state.classes.filter(c => c.classID === this.state.classID)[0].year});
         this.setState({callChangeClass: false});
