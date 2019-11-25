@@ -83,7 +83,7 @@ namespace HighSchoolManagerAPI.Controllers
 
         // POST: api/Teacher/Create
         [HttpPost("Create")]
-        [Authorize(Roles = "Manager")]
+        [Authorize(Roles = "Manager, Admin")]
         public ActionResult CreateTeacher(TeacherModel model)
         {
             if (ModelState.IsValid)
@@ -98,7 +98,7 @@ namespace HighSchoolManagerAPI.Controllers
                 // create teacher
                 _teacherService.CreateTeacher(teacher);
 
-                return StatusCode(201); // 201: Created
+                return StatusCode(201, teacher); // 201: Created
             }
             else
             {
@@ -117,7 +117,7 @@ namespace HighSchoolManagerAPI.Controllers
 
         // DELETE: api/Teacher/Delete?teacherId=5
         [HttpDelete("Delete")]
-        [Authorize(Roles = "Manager")]
+        [Authorize(Roles = "Manager, Admin")]
         public ActionResult DeleteTeacher(int teacherId)
         {
             var teacher = _teacherService.GetTeacher(teacherId);

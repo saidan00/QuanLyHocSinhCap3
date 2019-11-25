@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Select, Table} from 'antd';
 import styles from './ClassPicker.module.css';
 
+import Fetch from '../../../common/commonFetch';
 import Request from '../../../common/commonRequest';
 import Params from '../../../common/commonParams';
 import ClassPickerContext from '../../../context/classpicker-context';
@@ -80,12 +81,6 @@ class ClassPicker extends Component {
     });
   }
 
-  async fetchGrades() {
-    await Request.get('/Grade/Get', 'cred', response => {
-      this.setState({grades: response.data});
-    });
-  }
-
   filterOnChangeHandler = (event, key) => {
     const value = event ? (event.target ? event.target.value : event) : null;
     this.setState(prevState => {
@@ -100,7 +95,7 @@ class ClassPicker extends Component {
 
   async componentDidMount() {
     this.setState({chosenClass: this.props.defaultClass});
-    await Promise.all([this.fetchYears(), this.fetchGrades()]);
+    await Promise.all([this.fetchYears(), Fetch.fetchGrades(this)]);
     await this.fetchClasses();
     this.setState({loading: false});
   }
