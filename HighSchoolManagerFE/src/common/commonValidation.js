@@ -95,6 +95,16 @@ class CommonValidation {
   static validate_RangeTo(value, to) {
     return value <= to;
   }
+  static validate_FromYearsOld(value, from) {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    return (value.year() <= (currentYear - from));
+  }
+  static validate_ToYearsOld(value, to) {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    return (value.year() >= (currentYear - to));
+  }
 
   // Single Field Validation
   static validateField(formFields, fieldId, value) {
@@ -126,6 +136,14 @@ class CommonValidation {
         case 'RangeTo':
           validated = this.validate_RangeTo(value, _params[0]);
           formFields[fieldId].errorMessage = `Must be <= ${_params[0]}`;
+          break;
+        case 'FromYearsOld':
+          validated = this.validate_FromYearsOld(value, _params[0]);
+          formFields[fieldId].errorMessage = `Must be ${_params[0]} or older`;
+          break;
+        case 'ToYearsOld':
+          validated = this.validate_ToYearsOld(value, _params[0]);
+          formFields[fieldId].errorMessage = `Must be younger than ${_params[0] +1}`;
           break;
         default:
           validated = false;

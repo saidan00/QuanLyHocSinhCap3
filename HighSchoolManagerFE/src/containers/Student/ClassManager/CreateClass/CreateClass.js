@@ -1,5 +1,5 @@
 import React, {Component, Fragment} from 'react';
-import {Table, Input, InputNumber, Select, Checkbox, Popconfirm, Steps, Icon, Result, message} from 'antd';
+import {Table, Input, InputNumber, Select, Popconfirm, Steps, Icon, Result, message} from 'antd';
 import styles from './CreateClass.module.css';
 
 import Request from '../../../../common/commonRequest';
@@ -68,6 +68,10 @@ class CreateClass extends Component {
     },
   };
 
+  getPreviousYear() {
+    return (this.state.years.length > 1) ? [...this.state.years].reverse()[1] : this.state.classModel.year-1;
+  }
+
   form1OnChangeHandler = (event, key) => {
     const value = event ? (event.target ? event.target.value : event) : null;
     let newModel = {...this.state.classModel};
@@ -111,7 +115,7 @@ class CreateClass extends Component {
           _additionalInfo['availableStudents'] = _availableStudents;
           this.setState({step1_additionalInfos: _availableStudents});
         });
-        await Request.get(`/Student/Get?gradeid=${this.state.classModel.gradeID-1}&year=${this.state.classModel.year-1}`, 'cred', response => {
+        await Request.get(`/Student/Get?gradeid=${this.state.classModel.gradeID-1}&year=${this.getPreviousYear()}`, 'cred', response => {
           _availableStudents += response.data.length;
           _additionalInfo['availableStudents'] = _availableStudents;
           this.setState({step1_additionalInfos: _availableStudents});
@@ -145,7 +149,7 @@ class CreateClass extends Component {
       studentsList = [...newStudentsList];
     });
     if (this.state.classModel.gradeID !== 1) {
-      const searchParams = `gradeID=${parseInt(this.state.classModel.gradeID)-1}&year=${this.state.classModel.year-1}`;
+      const searchParams = `gradeID=${parseInt(this.state.classModel.gradeID)-1}&year=${this.getPreviousYear()}`;
       await Request.get('Student/Get?'+searchParams, 'cred', response => {
         const newStudentsList2 = response.data.map(s => {
           return {
@@ -173,6 +177,17 @@ class CreateClass extends Component {
         });
       });
       //this.setState({step2_teachersList: acceptedTeachers});
+    });
+  }
+
+  async fetchYears() {
+    let newYears = [];
+    await Request.get('/Semester/Get', 'cred', response => {
+      newYears = response.data.map(s => s.year);
+      newYears = newYears.filter((y, index, self) => self.indexOf(y) === index);
+      let newModel = {...this.state.classModel};
+      newModel.year = [...newYears].reverse()[0];
+      this.setState({years: newYears, classModel: newModel});
     });
   }
 
@@ -332,7 +347,7 @@ class CreateClass extends Component {
 
   async componentDidMount() {
     this.validateForm = Validation.validateForm;
-    await Promise.all([this.fetchGrades(), this.fetchAdditionalInfos()]);
+    await Promise.all([this.fetchGrades(), this.fetchYears(), this.fetchAdditionalInfos()]);
     this.setState({loading: false});
   }
 
@@ -413,8 +428,6 @@ class CreateClass extends Component {
                   onBlur={e => this.validateField1OnBlurHandler(e, 'quantity')}
                 />
                 <InvalidBox margin="5px 16px 0 148px" width="200px">{errorProps1.quantity.message}</InvalidBox>
-                <span style={{...inputMarginSibling, ...spanWidth}}>&nbsp;</span>
-                <Checkbox style={{...inputMarginSibling, ...inputWidth}} >Recommended quantity</Checkbox>
               </div>
               <div
                 className={styles.FieldWrapper}
@@ -486,7 +499,7 @@ class CreateClass extends Component {
                     <b>
                       {this.state.classModel.gradeID === 1 ?
                         "Students with no class" :
-                        `Students of Grade ${this.state.step1_grades.filter(g => g.gradeID === this.state.classModel.gradeID-1)[0].name}, Previous Year (${this.state.classModel.year-1}-${this.state.classModel.year-1+1})`}
+                        `Students of Grade ${this.state.step1_grades.filter(g => g.gradeID === this.state.classModel.gradeID-1)[0].name}, Previous Year (${this.getPreviousYear()}-${this.getPreviousYear()+1})`}
                     </b>
                   </div>
                 </div>

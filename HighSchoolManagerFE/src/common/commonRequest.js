@@ -57,6 +57,12 @@ class CommonRequest {
     });
   }
 
+  static showDescriptiveError(error, key) {
+    error.response.data[key].forEach(m => {
+      message.error(m.description);
+    });
+  }
+
   static timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }

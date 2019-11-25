@@ -45,7 +45,11 @@ class EditStudent extends Component {
     birthday: {
       event: {},
       label: 'Date of Birth',
-      validates: [{name: 'NotNull', params: []}],
+      validates: [
+        {name: 'NotNull', params: []},
+        {name: 'FromYearsOld', params: [14]},
+        {name: 'ToYearsOld', params: [18]},
+      ],
       errorMessage: '',
     },
     address: {
@@ -76,7 +80,7 @@ class EditStudent extends Component {
 
   submitFormHandler = () => {
     if (!this.validateForm(this.formFields, 'invalidFields', this)) {
-      message.error('Add student failed. Check for invalid fields');
+      message.error('Editing student failed. Check for invalid fields');
       return;
     }
     const newStudent = {...this.state.editingStudent};
@@ -97,7 +101,7 @@ class EditStudent extends Component {
       },
       error => {
         setTimeout(reqMessage, 0);
-        message.error('Added student failed');
+        message.error('Editing student failed');
         console.log('PUT UNSUCCESSFUL :(', error.response);
         this.setState({submittingForm: false});
       },

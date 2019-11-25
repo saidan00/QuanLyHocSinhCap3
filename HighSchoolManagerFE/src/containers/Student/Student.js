@@ -1,10 +1,10 @@
 import React, {Component, Fragment} from 'react';
 import {Link, Route} from 'react-router-dom';
 import {Input, Select, Table} from 'antd';
-import moment from 'moment';
 import styles from './Student.module.css';
 
 import AuthContext from '../../context/auth-context';
+import Fetch from '../../common/commonFetch';
 import Request from '../../common/commonRequest';
 import Params from '../../common/commonParams';
 import Auth from '../../common/commonAuth';
@@ -46,7 +46,7 @@ class Student extends Component {
   };
 
   async componentDidMount() {
-    await Promise.all([this.fetchStudents(), this.fetchGrades(), this.fetchClasses()]);
+    await Promise.all([Fetch.fetchStudents(this), Fetch.fetchGrades(this), this.fetchClasses()]);
     this.setState({loading: false});
     if (Auth.isInRoles(this.context.user.role, ["Manager"]) === false)
       this.setState(prevState => {return {tableColumns: prevState.tableColumns.filter(tC => tC.title !== "Actions")}});
@@ -55,16 +55,9 @@ class Student extends Component {
   async componentDidUpdate() {
     if (this.state.callUpdate) {
       this.setState({callUpdate: false});
-      await Promise.all([this.fetchStudents(), this.fetchClasses()]);
+      await Promise.all([Fetch.fetchStudents(this), this.fetchClasses()]);
       this.setState({updating: false});
     }
-  }
-
-  async fetchGrades() {
-    await Request.get('/Grade/Get', 'cred', response => {
-      let _grades = response.data;
-      this.setState({grades: _grades});
-    });
   }
 
   async fetchClasses() {
@@ -78,29 +71,6 @@ class Student extends Component {
         return classesArr;
       }, {});
       this.setState({classes: _classes});
-    });
-  }
-
-  async fetchStudents() {
-    let searchParams = Params.getSearchParamsFromObj(this.state.filters);
-    if (parseInt(this.state.filters.gradeID) === 0)
-      searchParams = Params.getSearchParamsFromObj(this.state.filters, ['name'])+"&classID=0";
-    await Request.get('/Student/Get?'+searchParams, 'cred', response => {
-      let newStudents = response.data.map(_student => {
-        let newStudent = {};
-        newStudent.key = _student.studentID;
-        newStudent.classLabel = (_student.class) ? _student.class.name : <i>None</i>;
-        newStudent.classYear = (_student.class) ? _student.class.year : <i>None</i>;
-        newStudent.lastName = _student.lastName;
-        newStudent.firstName = _student.firstName;
-        newStudent.gender = _student.gender;
-        newStudent.birthday = moment(_student.birthday, 'YYYY/MM/DD');
-        newStudent.birthdayFormatted = newStudent.birthday.format('DD/MM/YYYY');
-        newStudent.address = _student.address;
-        newStudent.class = _student.class;
-        return newStudent;
-      });
-      this.setState({students: newStudents});
     });
   }
 

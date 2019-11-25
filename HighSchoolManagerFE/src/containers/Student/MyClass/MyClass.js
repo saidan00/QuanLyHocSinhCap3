@@ -50,6 +50,7 @@ class MyClass extends Component {
       }
       const classObj = response.data[0];
       this.setState({classInfo: classObj});
+      // Fetch Student list
       await Request.get('/Student/Get?classID='+classObj.classID, 'cred', response => {
         let newStudents = response.data.map(_student => {
           let newStudent = {};
@@ -65,11 +66,14 @@ class MyClass extends Component {
         });
         this.setState({students: newStudents});
       });
+      // Fetch Assigned Teachers
+      await this.fetchTeachingAssignments(classObj.classID);
+      this.setState({loading: false});
     });
   }
 
-  async fetchTeachingAssignments() {
-    let teachingAssignmentPromise = await Request.get('/TeachingAssignment/Get?classID='+this.state.classInfo.classID, 'cred');
+  async fetchTeachingAssignments(_classID) {
+    let teachingAssignmentPromise = await Request.get('/TeachingAssignment/Get?classID='+_classID, 'cred');
     let _teachingAssignments = teachingAssignmentPromise.data;
     _teachingAssignments = _teachingAssignments.map(tA => {
       let newTA = JSON.parse(JSON.stringify(tA));
@@ -81,8 +85,6 @@ class MyClass extends Component {
 
   async componentDidMount() {
     await this.fetchClass();
-    await this.fetchTeachingAssignments();
-    this.setState({loading: false});
   }
 
   render() {

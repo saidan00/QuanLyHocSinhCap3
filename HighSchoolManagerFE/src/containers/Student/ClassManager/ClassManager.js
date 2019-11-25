@@ -5,6 +5,7 @@ import moment from 'moment';
 import styles from './ClassManager.module.css';
 
 import ClassPickerContext from '../../../context/classpicker-context';
+import Fetch from '../../../common/commonFetch';
 import Request from '../../../common/commonRequest';
 import Modal from '../../../components/UI/Modal/Modal';
 import Button from '../../../components/UI/Button/Button';
@@ -176,14 +177,8 @@ class ClassManager extends Component {
     });
   }
 
-  async fetchTeachers() {
-    await Request.get('/Teacher/Get', 'cred', response => {
-      this.setState({teachers: response.data});
-    });
-  }
-
   async componentDidMount() {
-    await Promise.all([this.fetchClasses(), this.fetchTeachers()]);
+    await Promise.all([this.fetchClasses(), Fetch.fetchTeachers(this)]);
     await this.fetchDefaultClasses();
     await Promise.all([this.fetchStudentsOfClass1(), this.fetchStudentsOfClass2()]);
     this.setState({loading: false});
