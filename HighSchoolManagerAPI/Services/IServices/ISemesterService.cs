@@ -7,5 +7,6 @@ namespace HighSchoolManagerAPI.Services.IServices
     {
         Semester GetSemester(int semesterId);
         IEnumerable<Semester> GetSemesters(int? label, int? year);
+        void CreateSemester(Semester semester);
     }
 }
