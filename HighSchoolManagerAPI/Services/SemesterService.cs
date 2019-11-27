@@ -35,5 +35,11 @@ namespace HighSchoolManagerAPI.Services
 
             return semesters;
         }
+
+        public void CreateSemester(Semester semester)
+        {
+            _unitOfWork.Semester.Add(semester);
+            _unitOfWork.Complete();
+        }
     }
 }
