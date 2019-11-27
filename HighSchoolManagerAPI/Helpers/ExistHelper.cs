@@ -57,6 +57,11 @@ namespace HighSchoolManagerAPI.Helpers
             return (_unitOfWork.Semester.GetBy(id) != null);
         }
 
+        public bool SemesterExists(int label, int year)
+        {
+            return _unitOfWork.Semester.GetAll().Where(s => s.Label == label && s.Year == year).Any();
+        }
+
         public bool SubjectExists(int id)
         {
             return (_unitOfWork.Subject.GetBy(id) != null);
