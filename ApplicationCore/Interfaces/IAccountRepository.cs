@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -19,5 +20,7 @@ namespace ApplicationCore.Interfaces
         Task<bool> IsInRoleAsync(ApplicationUser user, string role);
         Task<IdentityResult> RemoveFromRoleAsync(ApplicationUser user, string role);
         Task<IdentityResult> RemoveFromRolesAsync(ApplicationUser user, IEnumerable<string> roles);
+        Task<IdentityResult> UpdateAsync(ApplicationUser user);
+        IQueryable<ApplicationUser> GetAll();
     }
 }

@@ -138,7 +138,7 @@ namespace HighSchoolManagerAPI.Controllers
         // Get curret logged in user
         [HttpGet("CurrentUser")]
         [Authorize]
-        public async Task<Object> CurrentUser()
+        public async Task<ActionResult> CurrentUser()
         {
             var userRoles = await _accountService.GetUserRolesAsync(User.Identity.Name);
             var user = await _accountService.GetUserAsync(User.Identity.Name);
@@ -153,7 +153,33 @@ namespace HighSchoolManagerAPI.Controllers
                 teacher = teacher
             };
 
-            return currentUser;
+            return Ok(currentUser);
+        }
+
+        [HttpGet("AllUsers")]
+        public async Task<ActionResult> GetUsers()
+        {
+            var users = _accountService.GetUsers();
+
+            List<object> listUsers = new List<object>();
+
+            foreach (var user in users)
+            {
+                var userRoles = await _accountService.GetUserRolesAsync(user.UserName);
+                // because using functions of Identity -> can't include teachers
+                var teacher = _teacherService.GetTeacher(user.TeacherID);
+
+                object currentUser = new
+                {
+                    userName = user.UserName,
+                    roles = userRoles.ElementAt(0),
+                    teacher = teacher
+                };
+
+                listUsers.Add(currentUser);
+            }
+
+            return Ok(listUsers);
         }
     }
 }

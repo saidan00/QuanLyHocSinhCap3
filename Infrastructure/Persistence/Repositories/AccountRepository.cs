@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
@@ -82,6 +83,16 @@ namespace Infrastructure.Persistence.Repositories
         public async Task<IdentityResult> RemoveFromRolesAsync(ApplicationUser user, IEnumerable<string> roles)
         {
             return await userManager.RemoveFromRolesAsync(user, roles);
+        }
+
+        public async Task<IdentityResult> UpdateAsync(ApplicationUser user)
+        {
+            return await userManager.UpdateAsync(user);
+        }
+
+        public IQueryable<ApplicationUser> GetAll()
+        {
+            return userManager.Users;
         }
     }
 }

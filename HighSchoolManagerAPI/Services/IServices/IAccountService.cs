@@ -19,6 +19,8 @@ namespace HighSchoolManagerAPI.Services.IServices
         Task<bool> IsInRoleAsync(ApplicationUser user, string role);
         Task<IdentityResult> RemoveFromRoleAsync(ApplicationUser user, string role);
         Task<IdentityResult> RemoveFromRolesAsync(ApplicationUser user, IEnumerable<string> roles);
+        Task<IdentityResult> ChangePasswordAsync(ApplicationUser user, string newPassword);
+        IEnumerable<ApplicationUser> GetUsers();
         // public IEnumerable<string> GetUserRoles(string UserName);
         // public string GetUserName(int? teacherId);
     }

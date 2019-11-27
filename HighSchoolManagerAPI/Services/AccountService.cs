@@ -4,6 +4,7 @@ using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using HighSchoolManagerAPI.Services.IServices;
+using System.Linq;
 
 namespace HighSchoolManagerAPI.Services
 {
@@ -79,6 +80,20 @@ namespace HighSchoolManagerAPI.Services
         public async Task<IdentityResult> RemoveFromRolesAsync(ApplicationUser user, IEnumerable<string> roles)
         {
             return await _unitOfWork.Account.RemoveFromRolesAsync(user, roles);
+        }
+
+        public async Task<IdentityResult> ChangePasswordAsync(ApplicationUser user, string newPassword)
+        {
+            var hasher = new PasswordHasher<ApplicationUser>();
+            string newPasswordHash = hasher.HashPassword(user, newPassword);
+            user.PasswordHash = newPasswordHash;
+
+            return await _unitOfWork.Account.UpdateAsync(user);
+        }
+
+        public IEnumerable<ApplicationUser> GetUsers()
+        {
+            return _unitOfWork.Account.GetAll();
         }
     }
 }

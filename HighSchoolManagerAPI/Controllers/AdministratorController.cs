@@ -11,11 +11,11 @@ namespace HighSchoolManagerAPI.Controllers
     [Route("api/[controller]")]
     [ApiController]
     // [Authorize(Roles = "Admin")]
-    public class Administrator2Controller : ControllerBase
+    public class AdministratorController : ControllerBase
     {
         private readonly IAccountService _accountService;
         private ResponseHelper resp;
-        public Administrator2Controller(IAccountService accountService)
+        public AdministratorController(IAccountService accountService)
         {
             _accountService = accountService;
             resp = new ResponseHelper();
@@ -96,6 +96,23 @@ namespace HighSchoolManagerAPI.Controllers
 
             // Add user to new role
             await _accountService.AddUserToRoleAsync(user, role);
+
+            return Ok();
+        }
+
+        [HttpPut("ChangeUserPassword")]
+        public async Task<ActionResult> ChangePassword(LoginModel model)
+        {
+            var user = await _accountService.GetUserAsync(model.UserName);
+            // if user exist
+            if (user == null)
+            {
+                resp.code = 404;
+                resp.messages.Add("User " + model.UserName + " not found");
+                return NotFound(resp);
+            }
+
+            await _accountService.ChangePasswordAsync(user, model.Password);
 
             return Ok();
         }
