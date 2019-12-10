@@ -45,7 +45,7 @@ class MyClass extends Component {
   async fetchClass() {
     await Request.get('/Class/Get?headTeacherID='+this.context.teacher.teacherID, 'cred', async(response) => {
       if (response.data.length < 1) {
-        this.setState({hasNoClass: true});
+        this.setState({hasNoClass: true, loading: false});
         return;
       }
       const classObj = response.data[0];

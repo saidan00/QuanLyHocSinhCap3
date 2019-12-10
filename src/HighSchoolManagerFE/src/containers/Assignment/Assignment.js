@@ -134,15 +134,15 @@ class Assignment extends Component {
     this.setState({addingAssignment: _model});
   };
 
-  newAssignmentHandler = () => {
+  newAssignmentHandler = async () => {
     const _assignment = {...this.state.addingAssignment};
     const reqMessage = message.loading('Submitting', 9000);
     this.setState({callAddAssignment: true});
-    Request.post('/TeachingAssignment/Create', _assignment, 'cred',
+    await Request.post('/TeachingAssignment/Create', _assignment, 'cred',
       () => {
         this.setState({addingAssignment: {teacherID: null, classID: null, subjectID: null}});
-        this.setState({callAddAssignment: false});
         this.setState({callUpdate: true, updating: true});
+        this.setState({callAddAssignment: false});
         setTimeout(reqMessage, 0);
       },
       error => {
@@ -150,6 +150,7 @@ class Assignment extends Component {
         if (_assignment.teacherID && _assignment.classID && _assignment.subjectID)
           message.error(error.response.data.messages[0]);
         else {
+          this.setState({callAddAssignment: false});
           message.error("Assignment has insufficient information");
         }
       },
