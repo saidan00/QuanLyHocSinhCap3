@@ -146,11 +146,11 @@ class Assignment extends Component {
         setTimeout(reqMessage, 0);
       },
       error => {
+        this.setState({callAddAssignment: false});
         setTimeout(reqMessage, 0);
         if (_assignment.teacherID && _assignment.classID && _assignment.subjectID)
           message.error(error.response.data.messages[0]);
         else {
-          this.setState({callAddAssignment: false});
           message.error("Assignment has insufficient information");
         }
       },

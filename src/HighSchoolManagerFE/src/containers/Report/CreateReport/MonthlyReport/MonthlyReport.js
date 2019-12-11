@@ -53,27 +53,27 @@ class MonthlyReport extends Component {
         title: 'Rank',
         dataIndex: 'rank',
         key: 'rank',
-        fixed: "left",
+        //fixed: "left",
       },
       {
         title: 'Last Name',
         width: 200,
         key: 'lastName',
         render: (text, record, index) => record.student.lastName,
-        fixed: "left",
+        //fixed: "left",
       },
       {
         title: 'First Name',
         width: 150,
         key: 'firstName',
         render: (text, record, index) => record.student.firstName,
-        fixed: "left",
+        //fixed: "left",
       },
       {
         title: 'Class',
         key: 'class',
         render: (text, record, index) => record.student.class.name,
-        fixed: "left",
+        //fixed: "left",
         sorter: (a,b) => a.student.class.name.localeCompare(b.student.class.name),
         sortDirections: ['ascend', 'descend'],
       },
@@ -95,11 +95,11 @@ class MonthlyReport extends Component {
         sorter: (a,b) => a.performance.localeCompare(b.performance),
         sortDirections: ['ascend', 'descend'],
       },
-      {
-        title: 'Conduct',
-        key: 'conduct',
-        render: (text, record, index) => <b>A</b> //TODO (never): get Conduct
-      },
+      //{
+        //title: 'Conduct',
+        //key: 'conduct',
+        //render: (text, record, index) => <b>A</b> //TODO (never): get Conduct
+      //},
     ];
     for (let c of leftColumns)
       tableColumns.push(c);

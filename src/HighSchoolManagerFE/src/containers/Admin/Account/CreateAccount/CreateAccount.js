@@ -46,7 +46,10 @@ class CreateAccount extends Component {
     birthday: {
       event: {},
       label: 'Date of Birth',
-      validates: [{name: 'NotNull', params: []}],
+      validates: [
+        {name: 'NotNull', params: []},
+        {name: 'FromYearsOld', params: [22]},
+      ],
       errorMessage: '',
     },
   };
