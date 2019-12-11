@@ -115,14 +115,14 @@ namespace Infrastructure.Persistence
             {
                 new Semester
                 {
-                    Label = 1,
+                    Label = 2,
                     Year = 2018
                 },
                 new Semester
                 {
-                    Label = 2,
+                    Label = 1,
                     Year = 2018
-                }
+                },
             };
             foreach (Semester s in semesters)
             {
@@ -135,8 +135,8 @@ namespace Infrastructure.Persistence
             {
                 new ResultType
                 {
-                    Name = "15' Test",
-                    Coefficient = 1
+                    Name = "Exam",
+                    Coefficient = 3
                 },
                 new ResultType
                 {
@@ -145,8 +145,8 @@ namespace Infrastructure.Persistence
                 },
                 new ResultType
                 {
-                    Name = "Exam",
-                    Coefficient = 3
+                    Name = "15' Test",
+                    Coefficient = 1
                 },
             };
             foreach (ResultType rT in resultTypes)

@@ -204,7 +204,14 @@ namespace HighSchoolManagerAPI.Controllers
                     else
                     {
                         // get monthly average
-                        average = result.ResultDetails.ToList()[0].MonthlyAverage;
+                        if (result.ResultDetails.Count() == 0)
+                        {
+                            average = null;
+                        }
+                        else
+                        {
+                            average = result.ResultDetails.ToList()[0].MonthlyAverage;
+                        }
                     }
 
                     ResultAverage resultAverage = new ResultAverage()

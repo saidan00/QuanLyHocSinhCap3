@@ -97,7 +97,7 @@ class CommonFetch {
   }
 
   static async fetchTeachingAssignments(component, acceptedFilters) {
-    const searchParams = Params.getSearchParamsFromObj(component, acceptedFilters);
+    const searchParams = Params.getSearchParamsFromObj(component.state.filters, acceptedFilters);
     let teachingAssignmentPromise = await Request.get('/TeachingAssignment/Get?'+searchParams, 'cred');
     let _teachingAssignments = teachingAssignmentPromise.data.filter(tA => component.state.filteredTeachers.includes(tA.teacherID));
     _teachingAssignments = _teachingAssignments.map(tA => {

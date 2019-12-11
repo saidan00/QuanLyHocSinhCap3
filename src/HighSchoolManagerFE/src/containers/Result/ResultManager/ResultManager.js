@@ -22,10 +22,13 @@ class ResultManager extends Component {
     subjects: [],
     formattedClasses: [],
     classes: [],
-    year: 0,
+    //year: 0,
     subjectID: null,
     classID: null,
 
+    filters: {
+      year: 0,
+    },
     currentMarkModel: {
       studentID: null,
       month: null,
@@ -76,8 +79,7 @@ class ResultManager extends Component {
     return studentIndex;
   }
   monthToSemester = (_month) => {
-
-    return (_month >= 9 && _month <= 12) ? this.state.semesters[0].semesterID : this.state.semesters[1].semesterID;
+    return (_month >= 9 && _month <= 12) ? this.state.semesters.filter(s => s.label === 1)[0].semesterID : this.state.semesters.filter(s => s.label === 2)[0].semesterID;
   }
 
   filterOnChangeHandler = (event, key) => {
@@ -119,6 +121,7 @@ class ResultManager extends Component {
       return;
     }
     const reqMessage = message.loading('Submitting', 9000);
+    console.log(_studentID, this.monthToSemester(_month), this.state.subjectID, _month, parseFloat(_mark), _type);
     let newResultDetailsPromise = await Request.post('/Result/UpdateMark', {
       studentID: _studentID,
       semesterID: this.monthToSemester(_month),
@@ -278,7 +281,7 @@ class ResultManager extends Component {
   async getSubjectMonthlyAverages(studentID) {
     let resultAvgs = [];
     let subjectMonthlyAveragePromise = await Request
-      .get(`/Result/SubjectMonthlyAverages?studentID=${studentID}&year=${this.state.year}&subjectID=${this.state.subjectID}`, 'cred');
+      .get(`/Result/SubjectMonthlyAverages?studentID=${studentID}&year=${this.state.filters.year}&subjectID=${this.state.subjectID}`, 'cred');
     resultAvgs = subjectMonthlyAveragePromise.data.averages;
     return resultAvgs;
   }
@@ -286,7 +289,7 @@ class ResultManager extends Component {
   async getSubjectYearlyAverages(studentID) {
     let resultYearAvgs = [];
     let subjectYearlyAveragePromise = await Request
-      .get(`/Result/SubjectYearlyAverages?studentID=${studentID}&year=${this.state.year}&subjectID=${this.state.subjectID}`, 'cred');
+      .get(`/Result/SubjectYearlyAverages?studentID=${studentID}&year=${this.state.filters.year}&subjectID=${this.state.subjectID}`, 'cred');
     resultYearAvgs = subjectYearlyAveragePromise.data;
     return resultYearAvgs;
   }
@@ -303,7 +306,7 @@ class ResultManager extends Component {
         newStudent.resultDetails = [];
         // resultDetails - Subject ResultDetails of Semesters
         //TODO: get semesters of selected years only
-        for (let sem of this.state.semesters.filter(s => s.year === this.state.year)) {
+        for (let sem of this.state.semesters.filter(s => s.year === this.state.filters.year)) {
           let semesterResultDetailsPromise = await Request
             .get(`/Result/Get?studentID=${newStudent.key}&semesterID=${sem.semesterID}&subjectID=${this.state.subjectID}`, 'cred');
           const _resultDetails = semesterResultDetailsPromise.data[0] ? semesterResultDetailsPromise.data[0].resultDetails : null;
@@ -350,9 +353,11 @@ class ResultManager extends Component {
       this.setState({callUpdate: false});
       await this.fetchAssignedClasses();
       if (this.state.callChangeClass) {
-        this.setState({subjectID: null, year: this.state.classes.filter(c => c.classID === this.state.classID)[0].year});
+        let newFilters = {...this.state.filters};
+        newFilters.year = this.state.classes.filter(c => c.classID === this.state.classID)[0].year;
+        this.setState({subjectID: null, filters: newFilters});
         this.setState({callChangeClass: false});
-        await this.fetchSubjects();
+        await Promise.all([this.fetchSubjects(), Fetch.fetchSemesters(this)]);
       }
       await this.fetchStudentsResults();
       this.markInputEventsInitialize();
